@@ -1,0 +1,21 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "@lib/database/(.*)": "<rootDir>/../libs/database/src/$1",
+    "@lib/database": "<rootDir>/../libs/database/src",
+    "@libs/database/(.*)": "<rootDir>/../libs/database/src/$1",
+    "@libs/database": "<rootDir>/../libs/database/src",
+    "@libs/enums/(.*)": "<rootDir>/../libs/enums/src/$1",
+    "@libs/enums": "<rootDir>/../libs/enums/src"
+  }
+}
