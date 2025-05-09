@@ -1,9 +1,10 @@
 services:
   postgres-db:
     image: postgres:15
+    container_name: postgres-15
     restart: always
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}

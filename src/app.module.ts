@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from '@libs/database';
 import configuration from 'src/configs/configuration';
 import { ValidationSchema } from './configs/validationSchema';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ValidationSchema } from './configs/validationSchema';
       name: 'default',
       useClass: DatabaseConfig,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
