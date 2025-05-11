@@ -7,6 +7,7 @@ import { DatabaseConfig } from '@libs/database';
 import configuration from 'src/configs/configuration';
 import { ValidationSchema } from './configs/validationSchema';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuthModule } from './auth/auth.module';
       useClass: DatabaseConfig,
     }),
     AuthModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
