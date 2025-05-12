@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
+import {
+  JsonWebTokenError,
+  JwtService,
+  NotBeforeError,
+  TokenExpiredError,
+} from '@nestjs/jwt';
 import { Request } from 'express';
 import { RedisRepository } from 'src/redis/redis.repository';
 import { IS_PUBLIC_KEY } from 'src/utils/decorators/ispublic.decorator';
@@ -36,21 +41,32 @@ export class AuthGuard implements CanActivate {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    const verify = this.jwtService.verify(token, {
-      secret: this.configService.getOrThrow<string>('jwt.secret'),
-    });
+    try {
+      const verify = this.jwtService.verify(token, {
+        secret: this.configService.getOrThrow<string>('jwt.secret'),
+      });
+      const getSession = await this.redisRepository.get(
+        `${verify.id}:${verify.email}`,
+      );
+      if (!getSession) {
+        throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
+      }
 
-    const getSession = await this.redisRepository.get(
-      `${verify.id}:${verify.email}`,
-    );
-    if (!getSession) {
-      throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
+      const { accessToken, refreshToken, ...user } = JSON.parse(getSession);
+
+      request[REQUEST_USER_KEY] = user;
+      return true;
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new HttpException('TokenExpiredError', HttpStatus.UNAUTHORIZED);
+      } else if (err instanceof JsonWebTokenError) {
+        throw new HttpException('JsonWebTokenError', HttpStatus.UNAUTHORIZED);
+      } else if (err instanceof NotBeforeError) {
+        throw new HttpException('ExpireError', HttpStatus.UNAUTHORIZED);
+      } else {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
     }
-
-    const { accessToken, refreshToken, ...user } = JSON.parse(getSession);
-
-    request[REQUEST_USER_KEY] = user;
-    return true;
   }
 
   private extractTokenFromHeader(req: Request): string | undefined {
