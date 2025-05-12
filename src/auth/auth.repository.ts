@@ -22,7 +22,6 @@ export class AuthRepository extends BaseRepository {
     });
   }
 
-  // 이름(name) 중복 여부 확인 필요
   // 유저 생성
   async createUser(createUserDto: CreateUserDto) {
     const user = this.getRepository(User).create({
@@ -31,8 +30,4 @@ export class AuthRepository extends BaseRepository {
 
     await this.getRepository(User).save(user);
   }
-
-  // bcrypt 필요 X
-  // redis 세션 저장 유무 -> 보류
-  // jwt 발급 여부
 }

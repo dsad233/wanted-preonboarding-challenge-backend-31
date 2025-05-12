@@ -5,8 +5,8 @@ import { JwtService as _JwtService } from '@nestjs/jwt';
 export class JwtService {
   constructor(private readonly jwtService: _JwtService) {}
 
-  // 액세스 토큰 생성
-  async jwtSign(data: object, secretKey: string) {
+  // access 토큰 생성
+  async jwtSign(data: object, secretKey: string): Promise<string> {
     const sign = await this.jwtService.signAsync(data, {
       secret: secretKey,
       expiresIn: '1h',
@@ -14,7 +14,7 @@ export class JwtService {
     return sign;
   }
 
-  // 리프래쉬 토큰 셍성
+  // refresh 토큰 생성
   async jwtRefreshSign(
     data: object,
     refreshSecretKey: string,
