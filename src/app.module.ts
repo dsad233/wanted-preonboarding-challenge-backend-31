@@ -7,6 +7,10 @@ import { DatabaseConfig } from '@libs/database';
 import configuration from 'src/configs/configuration';
 import { ValidationSchema } from './configs/validationSchema';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
+import { JwtModule } from './jwt/jwt.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guard/auth.guard';
 
 @Module({
   imports: [
@@ -28,8 +32,16 @@ import { AuthModule } from './auth/auth.module';
       useClass: DatabaseConfig,
     }),
     AuthModule,
+    RedisModule,
+    JwtModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}
