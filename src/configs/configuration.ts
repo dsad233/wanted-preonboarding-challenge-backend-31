@@ -16,4 +16,8 @@ export default () => ({
     port: Number(process.env.REDIS_PORT),
     db: Number(process.env.REDIS_DB),
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    refreshSecret: process.env.JWT_REFRESH_SECRET,
+  },
 });
