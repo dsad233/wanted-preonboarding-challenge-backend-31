@@ -11,7 +11,7 @@ import { Product } from './product.entity';
   name: 'product_prices',
 })
 export class ProductPrice {
-  @PrimaryGeneratedColumn('uuid', { name: '가격 ID' })
+  @PrimaryGeneratedColumn('uuid', { comment: '가격 ID' })
   id: string;
 
   @Column('uuid', {
@@ -28,7 +28,7 @@ export class ProductPrice {
     nullable: false,
     comment: '기본 가격',
   })
-  basePrice: string;
+  basePrice: number;
 
   @Column('decimal', {
     name: 'sale_price',
@@ -37,7 +37,7 @@ export class ProductPrice {
     nullable: true,
     comment: '할인 가격',
   })
-  salePrice: string;
+  salePrice: number;
 
   @Column('decimal', {
     name: 'cost_price',
@@ -46,7 +46,7 @@ export class ProductPrice {
     nullable: true,
     comment: '원가 (관리용)',
   })
-  costPrice: string;
+  costPrice: number;
 
   @Column('varchar', {
     name: 'currency',
@@ -63,7 +63,7 @@ export class ProductPrice {
     nullable: true,
     comment: '세율',
   })
-  taxRate: string;
+  taxRate: number;
 
   @ManyToOne(() => Product, (product) => product.productPrices, {
     createForeignKeyConstraints: false,
