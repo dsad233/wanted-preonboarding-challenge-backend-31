@@ -12,6 +12,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
     AuthModule,
     RedisModule,
     JwtModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [

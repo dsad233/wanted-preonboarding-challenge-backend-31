@@ -12,7 +12,11 @@ async function bootstrap() {
         ? ['error', 'warn', 'log']
         : ['debug'],
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   const configService = app.get(ConfigService);
   app.useGlobalFilters(new HttpExceptionFilter());
 
