@@ -12,7 +12,7 @@ import {
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, Like } from 'typeorm';
 import {
   CreateProductCategoryDto,
   CreateProductDetailDto,
@@ -37,6 +37,29 @@ export class ProductsRepository extends BaseRepository {
   async findOneUniqueSlug(slug: string) {
     return await this.getRepository(Product).findOneBy({
       slug: slug,
+    });
+  }
+
+  // 관련 상품 전체 조회
+  async findSlug(slug: string) {
+    return await this.getRepository(Product).find({
+      where: { slug: Like(`%${slug}`) },
+      relations: { productImages: true, productPrices: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        shortDescription: true,
+        productImages: {
+          url: true,
+          altText: true,
+        },
+        productPrices: {
+          basePrice: true,
+          salePrice: true,
+          currency: true,
+        },
+      },
     });
   }
 
@@ -274,11 +297,6 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('category.parentCategory', 'parentCategory')
-      .leftJoinAndSelect(
-        'category.productCategories',
-        'parentProductCategories',
-      )
-      .leftJoinAndSelect('productCategories.category', 'joinParentCategory')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
       .leftJoinAndSelect('productOptionGroups.productOptions', 'productOptions')
       .leftJoinAndSelect('product.productImages', 'productImages')
@@ -291,6 +309,79 @@ export class ProductsRepository extends BaseRepository {
       throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
 
+    // category 데이터 가공 처리
+    const categoryArray = [];
+    if (result.productCategories?.length) {
+      for (const category of result.productCategories) {
+        categoryArray.push({
+          id: category.category?.id,
+          name: category.category?.name,
+          slug: category.category?.slug,
+          is_primary: category.isPrimary,
+          parent: {
+            id: category.category?.parentCategory?.id,
+            name: category.category?.parentCategory?.name,
+            slug: category.category?.parentCategory?.slug,
+          },
+        });
+      }
+    }
+
+    // productOptionGroups 데이터 가공 처리
+    const productOptionGroupArray = [];
+    if (result.productOptionGroups?.length) {
+      for (const optionGroup of result.productOptionGroups) {
+        const groupData = {
+          id: optionGroup.id,
+          name: optionGroup.name,
+          display_order: optionGroup.displayOrder,
+          options: [],
+        };
+
+        if (optionGroup.productOptions?.length) {
+          for (const option of optionGroup.productOptions) {
+            groupData.options.push({
+              id: option.id,
+              name: option.name,
+              additional_price: option.additionalPrice,
+              sku: option.sku,
+              stock: option.stock,
+              display_order: option.displayOrder,
+            });
+          }
+        }
+        productOptionGroupArray.push(groupData);
+      }
+    }
+
+    // productImages 데이터 가공 처리
+    const productImageArray = [];
+    if (result.productImages?.length) {
+      for (const image of result.productImages) {
+        productImageArray.push({
+          id: image.id,
+          url: image.url,
+          alt_text: image.altText,
+          is_primary: image.isPrimary,
+          display_order: image.displayOrder,
+          option_id: image.optionId,
+        });
+      }
+    }
+
+    // productTags 데이터 가공 처리
+    const productTagArray = [];
+    if (result.productTags?.length) {
+      for (const tag of result.productTags) {
+        productTagArray.push({
+          id: tag.tag?.id,
+          name: tag.tag?.name,
+          slug: tag.tag?.slug,
+        });
+      }
+    }
+
+    // reviews 데이터 가공 처리
     const review = result.reviews;
     let averageRating = 0;
     let ratingCount = 0;
@@ -314,6 +405,47 @@ export class ProductsRepository extends BaseRepository {
       averageRating += data.rating;
       ratingCount++;
     }
+
+    // 관련 추천 상품 조회
+    const slugSplit = result.slug.split('-');
+    const slug = await this.findSlug(slugSplit[slugSplit.length - 1]);
+
+    // 현재 상세 조회한 ProductId의 slug와,
+    // 별도로 추천 상품 조회를 시도한 slug의 일치하지 않는 목록에 한해서 데이터를 가공 처리
+    const recommendSlugArray = [];
+    if (slug?.length) {
+      for (const recommendProduct of slug) {
+        if (recommendProduct.slug !== result.slug) {
+          const slugData = {
+            id: recommendProduct.id,
+            name: recommendProduct.name,
+            slug: recommendProduct.slug,
+            short_description: recommendProduct.shortDescription,
+            primary_image: [],
+            base_price: null,
+            sale_price: null,
+            currency: null,
+          };
+
+          // 상품 이미지 가공 처리
+          for (const image of recommendProduct.productImages) {
+            slugData.primary_image.push({
+              url: image.url,
+              alt_text: image.altText,
+            });
+          }
+
+          for (const price of recommendProduct.productPrices) {
+            slugData.base_price = price.basePrice;
+            slugData.sale_price = price.salePrice;
+            slugData.currency = price.currency;
+          }
+
+          recommendSlugArray.push(slugData);
+        }
+      }
+    }
+
     return {
       id: result.id,
       name: result.name,
@@ -353,52 +485,17 @@ export class ProductsRepository extends BaseRepository {
         sale_price: result.productPrices[0]?.salePrice,
         currency: result.productPrices[0]?.currency,
         tax_rate: result.productPrices[0]?.taxRate,
+        // 할인율
         discount_percentage:
           ((result.productPrices[0]?.basePrice -
             result.productPrices[0]?.salePrice) /
             result.productPrices[0]?.basePrice) *
           100,
       },
-      categories: {
-        id: result.productCategories[0]?.category?.id,
-        name: result.productCategories[0]?.category?.name,
-        slug: result.productCategories[0]?.category?.slug,
-        is_primary: result.productCategories[0]?.isPrimary,
-        // 부모 관련 카테고리 조인 문제 발생하여 해결 필요
-        parent: {
-          id: result.productCategories[0]?.category?.parentCategory,
-          name: result.productCategories[0]?.category?.parentCategory,
-          // slug: result.productCategories[0]?.category?.parentCategory,
-        },
-      },
-      option_groups: {
-        id: result.productOptionGroups[0]?.id,
-        name: result.productOptionGroups[0]?.name,
-        display_order: result.productOptionGroups[0]?.displayOrder,
-        options: {
-          id: result.productOptionGroups[0]?.productOptions[0]?.id,
-          name: result.productOptionGroups[0]?.productOptions[0]?.name,
-          additional_price:
-            result.productOptionGroups[0]?.productOptions[0]?.additionalPrice,
-          sku: result.productOptionGroups[0]?.productOptions[0]?.sku,
-          stock: result.productOptionGroups[0]?.productOptions[0]?.stock,
-          display_order:
-            result.productOptionGroups[0]?.productOptions[0]?.displayOrder,
-        },
-      },
-      images: {
-        id: result.productImages[0]?.id,
-        url: result.productImages[0]?.url,
-        alt_text: result.productImages[0]?.altText,
-        is_primary: result.productImages[0]?.isPrimary,
-        display_order: result.productImages[0]?.displayOrder,
-        option_id: result.productImages[0]?.optionId,
-      },
-      tags: {
-        id: result.productTags[0].tag?.id,
-        name: result.productTags[0].tag?.name,
-        slug: result.productTags[0].tag?.slug,
-      },
+      categories: categoryArray,
+      option_groups: productOptionGroupArray,
+      images: productImageArray,
+      tags: productTagArray,
       rating: {
         average: averageRating / ratingCount,
         count: ratingCount,
@@ -410,6 +507,8 @@ export class ProductsRepository extends BaseRepository {
           1: ratingOne,
         },
       },
+      // 관련 추천 상품 목록
+      related_products: recommendSlugArray,
     };
   }
 }

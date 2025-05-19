@@ -58,9 +58,7 @@ export class ProductsService {
 
     return {
       success: true,
-      data: {
-        product,
-      },
+      data: product,
       message: '상품 등록이 성공적으로 처리되었습니다.',
     };
   }
