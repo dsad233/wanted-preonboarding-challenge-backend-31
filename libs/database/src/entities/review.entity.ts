@@ -42,13 +42,12 @@ export class Review extends BaseEntity {
   @Column('varchar', {
     name: 'title',
     length: 255,
-    nullable: true,
-    default: 0,
+    nullable: false,
     comment: '리뷰 제목',
   })
   title: string;
 
-  @Column('text', { name: 'content', nullable: true, comment: '리뷰 내용' })
+  @Column('text', { name: 'content', nullable: false, comment: '리뷰 내용' })
   content: string;
 
   @Column('boolean', {

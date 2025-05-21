@@ -38,7 +38,7 @@ export class ProductOption {
     default: 0,
     comment: '추가 가격',
   })
-  additionalPrice: string;
+  additionalPrice: number;
 
   @Column('varchar', {
     name: 'sku',

@@ -1,10 +1,10 @@
 import {
   CallHandler,
   ExecutionContext,
-  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { Request } from 'express';
 import { Observable, catchError, concatMap, finalize } from 'rxjs';
 import { DataSource } from 'typeorm';
@@ -14,7 +14,9 @@ export const ENTITY_MANAGER_KEY = 'ENTITY_MANAGER';
 @Injectable()
 // 참조: https://cdragon.tistory.com/entry/NestJS-NestJS-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98Transaction-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0With-TypeORM
 export class TransactionInterceptor implements NestInterceptor {
-  constructor(@Inject('default') private defaultDataSource: DataSource) {}
+  constructor(
+    @InjectDataSource('default') private defaultDataSource: DataSource,
+  ) {}
 
   async intercept(
     context: ExecutionContext,

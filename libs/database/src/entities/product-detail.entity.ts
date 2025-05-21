@@ -11,7 +11,7 @@ import { Product } from './product.entity';
   name: 'product_details',
 })
 export class ProductDetail {
-  @PrimaryGeneratedColumn('uuid', { name: '상세 ID' })
+  @PrimaryGeneratedColumn('uuid', { comment: '상세 ID' })
   id: string;
 
   @Column('uuid', {
@@ -35,7 +35,7 @@ export class ProductDetail {
     nullable: true,
     comment: '크기 (JSON)',
   })
-  dimensions: string[];
+  dimensions: Record<string, number>;
 
   @Column('text', { name: 'materials', nullable: true, comment: '소재 정보' })
   materials: string;
@@ -67,7 +67,7 @@ export class ProductDetail {
     nullable: true,
     comment: '추가 정보 (JSONB)',
   })
-  additionalInfo: string[];
+  additionalInfo: Record<string, number>;
 
   @ManyToOne(() => Product, (product) => product.productDetails, {
     createForeignKeyConstraints: false,

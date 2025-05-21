@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsUUID } from 'class-validator';
 
 @Exclude()
 export class UserPayloadDto {
@@ -8,6 +8,6 @@ export class UserPayloadDto {
   id: string;
 
   @Expose()
-  @IsString()
+  @IsEmail()
   email: string;
 }

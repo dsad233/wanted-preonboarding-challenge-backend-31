@@ -9,6 +9,7 @@ import { ProductOptionGroup } from './product-option-group.entity';
 import { ProductImage } from './product-image.entity';
 import { ProductTag } from './product-tag.entity';
 import { Review } from './review.entity';
+import { STATUS } from '@libs/enums';
 
 @Entity({
   name: 'products',
@@ -23,6 +24,9 @@ export class Product extends BaseEntity {
   })
   updatedAt: Date;
 
+  // Dto 단에서 picktype을 사용하여 필요한 데이터들만 뽑아서
+  // 생성을 하는데, 그 과정에서 validator 검사가 이루어지지 않아서 엔티티 딴에서 vaildator를 적용시켜버리는
+  // 방안이 존재하는 것인지에 대해서 알아보고 적용해야함.
   @Column('varchar', {
     name: 'name',
     length: 255,
@@ -75,7 +79,7 @@ export class Product extends BaseEntity {
     nullable: false,
     comment: '상태 (판매중, 품절, 삭제됨 등)',
   })
-  status: string;
+  status: STATUS.ProductStatus;
 
   @ManyToOne(() => Brand, (brand) => brand.products, {
     createForeignKeyConstraints: false,

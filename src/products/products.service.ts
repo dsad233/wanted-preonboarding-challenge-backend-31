@@ -1,0 +1,194 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ProductsRepository } from './products.repository';
+import { CreateProductPackageDto } from './dto/createProductDto';
+import { ProductRequestDto } from './dto/productRequestDto';
+import { UpdateProductPackageDto } from './dto/updateProductDto';
+
+@Injectable()
+export class ProductsService {
+  constructor(private productsRepository: ProductsRepository) {}
+
+  // 상품 생성
+  async create({
+    product,
+    productDetail,
+    productPrice,
+    productCategories,
+    productOptionGroups,
+    productImages,
+    productTags,
+  }: CreateProductPackageDto): Promise<object> {
+    // 상품 slug 중복 여부 조회
+    const slug = await this.productsRepository.findOneUniqueSlug(product.slug);
+
+    if (slug) {
+      throw new HttpException('Already Product Slug', HttpStatus.BAD_REQUEST);
+    }
+
+    // product 생성
+    const productData = await this.productsRepository.createProduct(product);
+
+    // product-detail 생성
+    await this.productsRepository.createProductDetail(
+      productData.id,
+      productDetail,
+    );
+
+    // product-price 생성
+    await this.productsRepository.createProductPrice(
+      productData.id,
+      productPrice,
+    );
+
+    // product-category 생성
+    await this.productsRepository.createProductCategory(
+      productData.id,
+      productCategories,
+    );
+
+    // product-option-group 생성
+    await this.productsRepository.createProductOptionGroup(
+      productData.id,
+      productOptionGroups,
+    );
+
+    // product-image 생성
+    await this.productsRepository.createProductImage(
+      productData.id,
+      productImages,
+    );
+
+    // product-tag 생성
+    await this.productsRepository.createProductTag(productData.id, productTags);
+
+    return {
+      success: true,
+      data: {
+        id: productData.id,
+        name: productData.name,
+        slug: productData.slug,
+        created_at: productData.createdAt,
+        updated_at: productData.updatedAt,
+      },
+      message: '상품이 성공적으로 등록되었습니다.',
+    };
+  }
+
+  // 상품 목록 전체 조회
+  async find(productRequestDto: ProductRequestDto): Promise<object> {
+    const products = await this.productsRepository.find(productRequestDto);
+    return {
+      success: true,
+      data: {
+        items: products,
+        pagination: {
+          total_items: products.length,
+          total_pages: Math.ceil(products.length / productRequestDto.getTake()),
+          current_page: productRequestDto.getPage(),
+          per_page: productRequestDto.getTake(),
+        },
+      },
+      message: '상품 목록을 성공적으로 조회했습니다.',
+    };
+  }
+
+  // 상품 목록 상세 조회
+  async findOne(id: string): Promise<object> {
+    const product = await this.productsRepository.findOne(id);
+    return {
+      success: true,
+      data: product,
+      message: '상품 상세 정보를 성공적으로 조회했습니다.',
+    };
+  }
+
+  // 상품 목록 수정
+  async update(
+    id: string,
+    {
+      product,
+      productDetail,
+      productPrice,
+      productCategories,
+      productOptionGroups,
+      productImages,
+      productTags,
+    }: UpdateProductPackageDto,
+  ): Promise<object> {
+    const productData = await this.productsRepository.findOneProductId(id);
+    if (!productData) {
+      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+
+    if (productData?.slug === product.slug) {
+      throw new HttpException('Already Product Slug', HttpStatus.BAD_REQUEST);
+    }
+
+    // 상품 목록 수정
+    const update = await this.productsRepository.updateProduct(id, product);
+
+    // 상품 상세 정보 수정
+    await this.productsRepository.updateProductDetail(id, productDetail);
+
+    // 상품 가격 정보 수정
+    await this.productsRepository.updateProductPrice(id, productPrice);
+
+    // 상품 카테고리 정보 수정
+    await this.productsRepository.updateProductCategory(id, productCategories);
+
+    // 상품 옵션 정보 수정
+    await this.productsRepository.updateProductOptionGroup(
+      id,
+      productOptionGroups,
+    );
+
+    // 상품 이미지 정보 수정
+    await this.productsRepository.updateProductImage(id, productImages);
+
+    // 상품 태그 정보 수정
+    await this.productsRepository.updateProductTag(id, productTags);
+
+    return {
+      success: true,
+      data: {
+        id: update.id,
+        name: update.name,
+        slug: update.slug,
+        updated_at: update.updatedAt,
+      },
+      message: '상품이 성공적으로 수정되었습니다.',
+    };
+  }
+
+  // 상품 목록 삭제
+  async delete(id: string): Promise<object> {
+    // 상품 목록 삭제
+    await this.productsRepository.deleteProduct(id);
+
+    // 상품 상세 정보 삭제
+    await this.productsRepository.deleteProductDetail(id);
+
+    // 상품 가격 정보 삭제
+    await this.productsRepository.deleteProductPrice(id);
+
+    // 상품 카테고리 정보 삭제
+    await this.productsRepository.deleteProductCategory(id);
+
+    // 상품 옵션 정보 삭제
+    await this.productsRepository.deleteProductOptionGroup(id);
+
+    // 상품 이미지 정보 삭제
+    await this.productsRepository.deleteProductImage(id);
+
+    // 상품 태그 정보 삭제
+    await this.productsRepository.deleteProductTag(id);
+
+    // 상품 리뷰 목록 삭제
+    await this.productsRepository.deleteProductReview(id);
+
+    return {
+      success: true,
+      message: '상품이 성공적으로 삭제되었습니다.',
+    };
+  }
+}
