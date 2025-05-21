@@ -10,7 +10,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductPackageDto } from './dto/createProductDto';
+import {
+  CreateProductImageDto,
+  CreateProductPackageDto,
+} from './dto/createProductDto';
 import { TransactionInterceptor } from 'src/utils/interceptors/transaction.interceptor';
 import { ProductRequestDto } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
@@ -54,5 +57,14 @@ export class ProductsController {
   @Delete('/:id')
   async delete(@Param('id') id: string): Promise<object> {
     return await this.productsService.delete(id);
+  }
+
+  // 상품 이미지 추가
+  @Post('/:id/image')
+  async createImage(
+    @Param('id') id: string,
+    @Body() createProductImageDto: CreateProductImageDto[],
+  ) {
+    return await this.productsService.createImage(id, createProductImageDto);
   }
 }
