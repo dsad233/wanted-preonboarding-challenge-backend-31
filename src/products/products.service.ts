@@ -1,6 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
-import { CreateProductPackageDto } from './dto/createProductDto';
+import {
+  CreateProductImageDto,
+  CreateProductPackageDto,
+} from './dto/createProductDto';
 import { ProductRequestDto } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
 
@@ -189,6 +192,19 @@ export class ProductsService {
     return {
       success: true,
       message: '상품이 성공적으로 삭제되었습니다.',
+    };
+  }
+
+  // 상품 이미지 추가
+  async createImage(
+    id: string,
+    createProductImageDto: CreateProductImageDto[],
+  ) {
+    await this.productsRepository.createProductImage(id, createProductImageDto);
+
+    return {
+      success: true,
+      message: '상품 이미지가 성공적으로 추가되었습니다.',
     };
   }
 }
