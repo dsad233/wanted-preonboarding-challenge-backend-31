@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
 import { ProductsModule } from './products/products.module';
+import { ProductOptionsModule } from './product-options/product-options.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ProductsModule } from './products/products.module';
     RedisModule,
     JwtModule,
     ProductsModule,
+    ProductOptionsModule,
   ],
   controllers: [AppController],
   providers: [
