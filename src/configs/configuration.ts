@@ -16,8 +16,13 @@ export default () => ({
     port: Number(process.env.REDIS_PORT),
     db: Number(process.env.REDIS_DB),
   },
+  // Jwt 설정
   jwt: {
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_ACCESS_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
+    exp: process.env.JWT_ACCESS_EXP,
+    refreshExp: process.env.JWT_REFRESH_EXP,
+    tokenTtl: process.env.JWT_ACCESS_REDIS_TTL,
+    refreshTokenTtl: process.env.JWT_REFRESH_REDIS_TTL,
   },
 });
