@@ -3,6 +3,7 @@ import {
   CreateProductCategoryDto,
   CreateProductDetailDto,
   CreateProductDto,
+  CreateProductOptionDto,
   CreateProductOptionGroupDto,
   CreateProductPriceDto,
   CreateProductTagDto,
@@ -26,10 +27,13 @@ export class UpdateProductCategoryDto extends PartialType(
   CreateProductCategoryDto,
 ) {}
 
-// 상품 옵션 정보 수정 DTO
+// 상품 옵션 그룹 정보 수정 DTO
 export class UpdateProductOptionGroupDto extends PartialType(
   CreateProductOptionGroupDto,
 ) {}
+
+// 상품 옵션 정보 수정 DTO
+export class UpdateProductOption extends PartialType(CreateProductOptionDto) {}
 
 // 상품 이미지 정보 수정 DTO
 export class UpdateProductImageDto extends PartialType(CreateProductPriceDto) {}

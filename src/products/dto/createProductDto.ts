@@ -2,16 +2,15 @@ import {
   Product,
   ProductCategory,
   ProductDetail,
-  ProductImage,
-  ProductOption,
-  ProductOptionGroup,
   ProductPrice,
   ProductTag,
 } from '@libs/database/entities';
+import { STATUS } from '@libs/enums';
 import { PartialType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -23,15 +22,18 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto extends PickType(Product, [
-  'slug',
   'sellerId',
   'brandId',
-  'status',
 ]) {
   @IsNotEmpty({ message: '상품명은 필수 항목입니다.' })
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
   name: string;
+
+  @IsNotEmpty({ message: 'URL 슬러그는 필수 항목입니다.' })
+  @IsString()
+  @MaxLength(255, { message: 'Max Length 255' })
+  slug: string;
 
   @IsOptional()
   @IsString()
@@ -41,6 +43,11 @@ export class CreateProductDto extends PickType(Product, [
   @IsOptional()
   @IsString()
   fullDescription?: string;
+
+  @IsNotEmpty({ message: '상품 상태 정보는 필수 항목입니다.' })
+  @IsEnum(STATUS.ProductStatus)
+  @MaxLength(20, { message: 'Max Length 20' })
+  status: STATUS.ProductStatus;
 }
 
 // 상품 상세 정보 생성 DTO
@@ -88,9 +95,12 @@ export class CreateProductCategoryDto extends PickType(ProductCategory, [
 }
 
 // 상품 옵션 그룹 정보 생성 DTO
-export class CreateProductOptionGroupDto extends PickType(ProductOptionGroup, [
-  'name',
-]) {
+export class CreateProductOptionGroupDto {
+  @IsNotEmpty({ message: '상품 옵션 그룹명은 필수 항목입니다.' })
+  @IsString()
+  @MaxLength(100, { message: 'Max Length 100' })
+  name: string;
+
   @IsOptional()
   @IsNumber()
   displayOrder?: number;
@@ -101,7 +111,12 @@ export class CreateProductOptionGroupDto extends PickType(ProductOptionGroup, [
 }
 
 // 상품 옵션 정보 생성 DTO
-export class CreateProductOptionDto extends PickType(ProductOption, ['name']) {
+export class CreateProductOptionDto {
+  @IsNotEmpty({ message: '상품명은 필수 항목입니다.' })
+  @IsString()
+  @MaxLength(255, { message: 'Max Length 255' })
+  name: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -123,7 +138,12 @@ export class CreateProductOptionDto extends PickType(ProductOption, ['name']) {
 }
 
 // 상품 이미지 생성 DTO
-export class CreateProductImageDto extends PickType(ProductImage, ['url']) {
+export class CreateProductImageDto {
+  @IsNotEmpty({ message: 'url 항목은 필수 항목입니다.' })
+  @IsString()
+  @MaxLength(255, { message: 'Max Length 255' })
+  url: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
