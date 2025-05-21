@@ -37,7 +37,7 @@ export class Category {
 
   @Column('uuid', {
     name: 'parent_id',
-    nullable: false,
+    nullable: true,
     comment: '상위 카테고리 ID',
   })
   parentId: string;

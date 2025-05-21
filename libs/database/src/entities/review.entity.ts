@@ -1,4 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  UpdateDateColumn,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Product } from './product.entity';
 import { User } from './user.entity';
@@ -7,7 +13,7 @@ import { User } from './user.entity';
   name: 'reviews',
 })
 export class Review extends BaseEntity {
-  @Column({
+  @UpdateDateColumn({
     name: 'updated_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
