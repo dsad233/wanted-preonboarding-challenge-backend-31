@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  UpdateDateColumn,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Brand } from './brand.entity';
 import { Seller } from './seller.entity';
@@ -15,7 +22,7 @@ import { STATUS } from '@libs/enums';
   name: 'products',
 })
 export class Product extends BaseEntity {
-  @Column({
+  @UpdateDateColumn({
     name: 'updated_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',

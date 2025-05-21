@@ -26,6 +26,16 @@ export class AuthController {
     return await this.authService.signIn(loginUserDto);
   }
 
+  // 토큰 재발급
+  @Post('/reissue')
+  async reissueToken(@ReqUser() payload: UserPayloadDto): Promise<object> {
+    const user = plainToClass(UserPayloadDto, payload, {
+      excludeExtraneousValues: true,
+    });
+    await validateOrReject(user);
+    return await this.authService.reissueToken(user);
+  }
+
   // 로그아웃
   @Post('/signout')
   async signOut(@ReqUser() payload: UserPayloadDto): Promise<object> {

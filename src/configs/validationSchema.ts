@@ -17,6 +17,10 @@ export const ValidationSchema = Joi.object({
   REDIS_PORT: Joi.number().required(),
   REDIS_DB: Joi.number().required(),
   // Jwt 설정
-  JWT_SECRET: Joi.string().required(),
+  JWT_ACCESS_SECRET: Joi.string().required(),
   JWT_REFRESH_SECRET: Joi.string().required(),
+  JWT_ACCESS_EXP: Joi.string().required(),
+  JWT_REFRESH_EXP: Joi.string().required(),
+  JWT_ACCESS_REDIS_TTL: Joi.number().required(),
+  JWT_REFRESH_REDIS_TTL: Joi.number().required(),
 });

@@ -7,14 +7,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import {
-  JsonWebTokenError,
-  JwtService,
-  NotBeforeError,
-  TokenExpiredError,
-} from '@nestjs/jwt';
 import { Request } from 'express';
-import { RedisRepository } from 'src/redis/redis.repository';
+import { JwtService } from 'src/jwt/jwt.service';
 import { IS_PUBLIC_KEY } from 'src/utils/decorators/ispublic.decorator';
 import { REQUEST_USER_KEY } from 'src/utils/decorators/user.decorator';
 
@@ -23,7 +17,6 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly redisRepository: RedisRepository,
     private readonly reflector: Reflector,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -41,32 +34,13 @@ export class AuthGuard implements CanActivate {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    try {
-      const verify = this.jwtService.verify(token, {
-        secret: this.configService.getOrThrow<string>('jwt.secret'),
-      });
-      const getSession = await this.redisRepository.get(
-        `${verify.id}:${verify.email}`,
-      );
-      if (!getSession) {
-        throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
-      }
+    const verify = await this.jwtService.tokenVerify(
+      token,
+      this.configService.getOrThrow<string>('jwt.secret'),
+    );
 
-      const { accessToken, refreshToken, ...user } = JSON.parse(getSession);
-
-      request[REQUEST_USER_KEY] = user;
-      return true;
-    } catch (err) {
-      if (err instanceof TokenExpiredError) {
-        throw new HttpException('TokenExpiredError', HttpStatus.UNAUTHORIZED);
-      } else if (err instanceof JsonWebTokenError) {
-        throw new HttpException('JsonWebTokenError', HttpStatus.UNAUTHORIZED);
-      } else if (err instanceof NotBeforeError) {
-        throw new HttpException('ExpireError', HttpStatus.UNAUTHORIZED);
-      } else {
-        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-      }
-    }
+    request[REQUEST_USER_KEY] = { id: verify.id, email: verify.email };
+    return true;
   }
 
   private extractTokenFromHeader(req: Request): string | undefined {

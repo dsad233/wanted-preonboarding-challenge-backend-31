@@ -22,7 +22,7 @@ import {
 export class DatabaseConfig implements TypeOrmOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
-  createTypeOrmOptions(): TypeOrmModuleOptions {
+  async createTypeOrmOptions(): Promise<TypeOrmModuleOptions> {
     return {
       type: 'postgres',
       username: this.configService.getOrThrow<string>('database.user'),

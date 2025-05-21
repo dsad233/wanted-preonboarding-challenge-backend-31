@@ -10,7 +10,7 @@ async function bootstrap() {
     logger:
       process.env.NODE_ENV === 'production'
         ? ['error', 'warn', 'log']
-        : ['debug'],
+        : ['error', 'warn', 'log', 'verbose', 'debug'],
   });
   app.useGlobalPipes(
     new ValidationPipe({
