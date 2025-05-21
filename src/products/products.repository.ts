@@ -8,11 +8,12 @@ import {
   ProductOptionGroup,
   ProductPrice,
   ProductTag,
+  Review,
 } from '@libs/database/entities';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Like } from 'typeorm';
+import { DataSource } from 'typeorm';
 import {
   CreateProductCategoryDto,
   CreateProductDetailDto,
@@ -22,7 +23,16 @@ import {
   CreateProductPriceDto,
   CreateProductTagDto,
 } from './dto/createProductDto';
-import { ProductRequestDto } from './dto/ProductRequestDto';
+import { ProductRequestDto } from './dto/productRequestDto';
+import {
+  UpdateProductCategoryDto,
+  UpdateProductDetailDto,
+  UpdateProductDto,
+  UpdateProductImageDto,
+  UpdateProductOptionGroupDto,
+  UpdateProductPriceDto,
+  UpdateProductTagDto,
+} from './dto/updateProductDto';
 
 @Injectable()
 export class ProductsRepository extends BaseRepository {
@@ -33,7 +43,7 @@ export class ProductsRepository extends BaseRepository {
     super(defaultDataSource, request);
   }
 
-  // slug 중복 유무 조회
+  // 상품 slug 중복 유무 조회
   async findOneUniqueSlug(slug: string) {
     return await this.getRepository(Product).findOneBy({
       slug: slug,
@@ -42,25 +52,18 @@ export class ProductsRepository extends BaseRepository {
 
   // 관련 상품 전체 조회
   async findSlug(slug: string) {
-    return await this.getRepository(Product).find({
-      where: { slug: Like(`%${slug}`) },
-      relations: { productImages: true, productPrices: true },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        shortDescription: true,
-        productImages: {
-          url: true,
-          altText: true,
-        },
-        productPrices: {
-          basePrice: true,
-          salePrice: true,
-          currency: true,
-        },
-      },
-    });
+    const product = this.getRepository(Product)
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.productImages', 'productImages')
+      .leftJoinAndSelect('product.productPrices', 'productPrices')
+      .where('product.slug LIKE :slug', { slug: `%${slug}` });
+
+    return await product.getMany();
+  }
+
+  // 상품 ID 조회
+  async findOneProductId(id: string) {
+    return await this.getRepository(Product).findOneBy({ id: id });
   }
 
   // 상품 생성
@@ -74,11 +77,11 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 상세 정보 생성
   async createProductDetail(
-    productId: string,
+    id: string,
     createProductDetailDto: CreateProductDetailDto,
   ) {
     const productDetail = this.getRepository(ProductDetail).create({
-      productId: productId,
+      productId: id,
       ...createProductDetailDto,
     });
 
@@ -87,83 +90,93 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 가격 정보 생성
   async createProductPrice(
-    productId: string,
+    id: string,
     createProductPriceDto: CreateProductPriceDto,
   ) {
     const productPrice = this.getRepository(ProductPrice).create({
-      productId: productId,
+      productId: id,
       ...createProductPriceDto,
     });
 
     await this.getRepository(ProductPrice).save(productPrice);
   }
 
-  // 상품 카테고리 생성
+  // 상품 카테고리 정보 생성
   async createProductCategory(
-    productId: string,
-    createProductCategoryDto: CreateProductCategoryDto,
+    id: string,
+    createProductCategoryDto: CreateProductCategoryDto[],
   ) {
-    const productCategory = this.getRepository(ProductCategory).create({
-      productId: productId,
-      ...createProductCategoryDto,
-    });
+    for (const newProductCategory of createProductCategoryDto) {
+      const productCategory = this.getRepository(ProductCategory).create({
+        productId: id,
+        ...newProductCategory,
+      });
 
-    await this.getRepository(ProductCategory).save(productCategory);
+      return await this.getRepository(ProductCategory).save(productCategory);
+    }
   }
 
   // 상품 옵션 그룹 정보 생성
   async createProductOptionGroup(
-    productId: string,
-    { name, displayOrder, productOptions }: CreateProductOptionGroupDto,
+    id: string,
+    createProductOptionGroupDto: CreateProductOptionGroupDto[],
   ) {
-    const productOptinonGroup = this.getRepository(ProductOptionGroup).create({
-      productId: productId,
-      name: name,
-      displayOrder: displayOrder,
-    });
+    for (const newProductOptionGroup of createProductOptionGroupDto) {
+      const productOptinonGroup = this.getRepository(ProductOptionGroup).create(
+        {
+          productId: id,
+          name: newProductOptionGroup.name,
+          displayOrder: newProductOptionGroup.displayOrder,
+        },
+      );
 
-    const saveProductOptinonGroup =
-      await this.getRepository(ProductOptionGroup).save(productOptinonGroup);
+      const save =
+        await this.getRepository(ProductOptionGroup).save(productOptinonGroup);
 
-    // 상품 옵션 정보 생성
-    for (const data of productOptions) {
-      const productOption = this.getRepository(ProductOption).create({
-        optionGroupId: saveProductOptinonGroup.id,
-        name: data.name,
-        additionalPrice: data.additionalPrice,
-        sku: data.sku,
-        stock: data.stock,
-        displayOrder: data.displayOrder,
-      });
+      // 상품 옵션 정보 생성
+      for (const data of newProductOptionGroup.productOptions) {
+        const productOption = this.getRepository(ProductOption).create({
+          optionGroupId: save.id,
+          name: data.name,
+          additionalPrice: data.additionalPrice,
+          sku: data.sku,
+          stock: data.stock,
+          displayOrder: data.displayOrder,
+        });
 
-      await this.getRepository(ProductOption).save(productOption);
+        await this.getRepository(ProductOption).save(productOption);
+      }
     }
   }
 
   // 상품 이미지 정보 생성
   async createProductImage(
-    productId: string,
-    createProductImageDto: CreateProductImageDto,
+    id: string,
+    createProductImageDto: CreateProductImageDto[],
   ) {
-    const productImage = this.getRepository(ProductImage).create({
-      productId: productId,
-      ...createProductImageDto,
-    });
+    for (const newProductImage of createProductImageDto) {
+      const productImage = this.getRepository(ProductImage).create({
+        productId: id,
+        ...newProductImage,
+      });
 
-    await this.getRepository(ProductImage).save(productImage);
+      await this.getRepository(ProductImage).save(productImage);
+    }
   }
 
   // 상품 태그 정보 생성
   async createProductTag(
-    productId: string,
-    createProductTagDto: CreateProductTagDto,
+    id: string,
+    createProductTagDto: CreateProductTagDto[],
   ) {
-    const productTag = this.getRepository(ProductTag).create({
-      productId: productId,
-      ...createProductTagDto,
-    });
+    for (const newProductTag of createProductTagDto) {
+      const productTag = this.getRepository(ProductTag).create({
+        productId: id,
+        ...newProductTag,
+      });
 
-    await this.getRepository(ProductTag).save(productTag);
+      await this.getRepository(ProductTag).save(productTag);
+    }
   }
 
   // 상품 목록 전체 조회
@@ -242,6 +255,15 @@ export class ProductsRepository extends BaseRepository {
     }
 
     const result = (await products.getMany()).map((data) => {
+      const productImageArray = [];
+      for (const image of data.productImages) {
+        if (image.isPrimary) {
+          productImageArray.push({
+            url: image?.url,
+            alt_text: image?.altText,
+          });
+        }
+      }
       const review = data.reviews;
       let averageRating = 0;
       let reviewCount = 0;
@@ -257,10 +279,7 @@ export class ProductsRepository extends BaseRepository {
         base_price: data.productPrices[0]?.basePrice,
         sale_price: data.productPrices[0]?.salePrice,
         currency: data.productPrices[0]?.currency,
-        primary_image: {
-          url: data.productImages[0]?.url,
-          alt_text: data.productImages[0]?.altText,
-        },
+        primary_image: productImageArray,
         brand: {
           id: data.brand?.id,
           name: data.brand?.name,
@@ -269,11 +288,12 @@ export class ProductsRepository extends BaseRepository {
           id: data.seller?.id,
           name: data.seller?.name,
         },
-        rating: averageRating / reviewCount,
+        rating: reviewCount ? averageRating / reviewCount : 0,
         review_count: reviewCount,
         // inStock 재고 유무 쿼리 값이 발생한다면, 재고 존재 유무 조회 (boolean)
         in_stock: productRequestDto.inStock
-          ? data.productOptionGroups[0]?.productOptions[0]?.stock > 0
+          ? // 이거 고려 해봐야 함 -> 배열 처리로 해서 데이터 조회를 시도 할 것인지
+            data.productOptionGroups[0]?.productOptions[0]?.stock > 0
             ? true
             : false
           : undefined,
@@ -332,21 +352,21 @@ export class ProductsRepository extends BaseRepository {
     if (result.productOptionGroups?.length) {
       for (const optionGroup of result.productOptionGroups) {
         const groupData = {
-          id: optionGroup.id,
-          name: optionGroup.name,
-          display_order: optionGroup.displayOrder,
+          id: optionGroup?.id,
+          name: optionGroup?.name,
+          display_order: optionGroup?.displayOrder,
           options: [],
         };
 
         if (optionGroup.productOptions?.length) {
           for (const option of optionGroup.productOptions) {
             groupData.options.push({
-              id: option.id,
-              name: option.name,
-              additional_price: option.additionalPrice,
-              sku: option.sku,
-              stock: option.stock,
-              display_order: option.displayOrder,
+              id: option?.id,
+              name: option?.name,
+              additional_price: option?.additionalPrice,
+              sku: option?.sku,
+              stock: option?.stock,
+              display_order: option?.displayOrder,
             });
           }
         }
@@ -359,12 +379,12 @@ export class ProductsRepository extends BaseRepository {
     if (result.productImages?.length) {
       for (const image of result.productImages) {
         productImageArray.push({
-          id: image.id,
-          url: image.url,
-          alt_text: image.altText,
-          is_primary: image.isPrimary,
-          display_order: image.displayOrder,
-          option_id: image.optionId,
+          id: image?.id,
+          url: image?.url,
+          alt_text: image?.altText,
+          is_primary: image?.isPrimary,
+          display_order: image?.displayOrder,
+          option_id: image?.optionId,
         });
       }
     }
@@ -411,30 +431,33 @@ export class ProductsRepository extends BaseRepository {
     const slug = await this.findSlug(slugSplit[slugSplit.length - 1]);
 
     // 현재 상세 조회한 ProductId의 slug와,
-    // 별도로 추천 상품 조회를 시도한 slug의 일치하지 않는 목록에 한해서 데이터를 가공 처리
+    // 별도로 추천 상품 조회를 시도한 slug와의 일치하지 않는 목록에 한해서 데이터를 가공 처리
     const recommendSlugArray = [];
     if (slug?.length) {
       for (const recommendProduct of slug) {
         if (recommendProduct.slug !== result.slug) {
           const slugData = {
-            id: recommendProduct.id,
-            name: recommendProduct.name,
-            slug: recommendProduct.slug,
-            short_description: recommendProduct.shortDescription,
+            id: recommendProduct?.id,
+            name: recommendProduct?.name,
+            slug: recommendProduct?.slug,
+            short_description: recommendProduct?.shortDescription,
             primary_image: [],
             base_price: null,
             sale_price: null,
             currency: null,
           };
 
-          // 상품 이미지 가공 처리
+          // 추천 상품에 대한 이미지 데이터 가공 처리
           for (const image of recommendProduct.productImages) {
-            slugData.primary_image.push({
-              url: image.url,
-              alt_text: image.altText,
-            });
+            if (image?.isPrimary) {
+              slugData.primary_image.push({
+                url: image?.url,
+                alt_text: image?.altText,
+              });
+            }
           }
 
+          // 추천 상품에 대한 가격 데이터 가공 처리
           for (const price of recommendProduct.productPrices) {
             slugData.base_price = price.basePrice;
             slugData.sale_price = price.salePrice;
@@ -510,5 +533,190 @@ export class ProductsRepository extends BaseRepository {
       // 관련 추천 상품 목록
       related_products: recommendSlugArray,
     };
+  }
+
+  // 상품 목록 수정
+  async updateProduct(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this.getRepository(Product).findOneBy({
+      id: id,
+    });
+
+    const merge = this.getRepository(Product).merge(product, updateProductDto);
+
+    return await this.getRepository(Product).save(merge);
+  }
+
+  // 상품 상세 정보 수정
+  async updateProductDetail(
+    id: string,
+    updateProductDetailDto: UpdateProductDetailDto,
+  ) {
+    await this.getRepository(ProductDetail).update(
+      { productId: id },
+      {
+        ...updateProductDetailDto,
+      },
+    );
+  }
+
+  // 상품 가격 정보 수정
+  async updateProductPrice(
+    id: string,
+    updateProductPriceDto: UpdateProductPriceDto,
+  ) {
+    await this.getRepository(ProductPrice).update(
+      { productId: id },
+      {
+        ...updateProductPriceDto,
+      },
+    );
+  }
+
+  // 상품 카테고리 정보 수정
+  async updateProductCategory(
+    id: string,
+    updateProductCategoryDto: UpdateProductCategoryDto[],
+  ) {
+    // 기존 카테고리 데이터 삭제
+    await this.getRepository(ProductCategory).delete({ productId: id });
+    for (const data of updateProductCategoryDto) {
+      const category = this.getRepository(ProductCategory).create({
+        productId: id,
+        ...data,
+      });
+
+      this.getRepository(ProductCategory).save(category);
+    }
+  }
+
+  // 상품 옵션 정보 수정
+  async updateProductOptionGroup(
+    id: string,
+    updateProductOptionGroupDto: UpdateProductOptionGroupDto[],
+  ) {
+    // 기존 상품 옵션 그룹 조회
+    const products = await this.getRepository(ProductOptionGroup).find({
+      where: { productId: id },
+    });
+
+    if (products?.length) {
+      for (const data of products) {
+        // 기존 상품 옵션 데이터 삭제
+        await this.getRepository(ProductOption).delete({
+          optionGroupId: data.id,
+        });
+      }
+    }
+
+    // 기존 상품 옵션 그룹 삭제
+    await this.getRepository(ProductOptionGroup).delete({
+      productId: id,
+    });
+
+    for (const data of updateProductOptionGroupDto) {
+      const productOptionGroup = this.getRepository(ProductOptionGroup).create({
+        productId: id,
+        name: data.name,
+        displayOrder: data.displayOrder,
+      });
+
+      await this.getRepository(ProductOptionGroup).save(productOptionGroup);
+
+      // 상품 옵션 정보 수정 값이 발생한다면 옵션 데이터 새로 생성
+      for (const option of data.productOptions) {
+        const productOption = this.getRepository(ProductOption).create({
+          optionGroupId: productOptionGroup.id,
+          ...option,
+        });
+
+        await this.getRepository(ProductOption).save(productOption);
+      }
+    }
+  }
+
+  // 상품 이미지 정보 수정
+  async updateProductImage(
+    id: string,
+    updateProductImageDto: UpdateProductImageDto[],
+  ) {
+    // 기존 상품 이미지 삭제
+    await this.getRepository(ProductImage).delete({ productId: id });
+    for (const data of updateProductImageDto) {
+      const image = this.getRepository(ProductImage).create({
+        productId: id,
+        ...data,
+      });
+
+      await this.getRepository(ProductImage).save(image);
+    }
+  }
+
+  // 싱품 태그 정보 수정
+  async updateProductTag(
+    id: string,
+    updateProductTagDto: UpdateProductTagDto[],
+  ) {
+    // 기존 상품 태그 정보 삭제
+    await this.getRepository(ProductTag).delete({ productId: id });
+    for (const data of updateProductTagDto) {
+      const tag = this.getRepository(ProductTag).create({
+        productId: id,
+        ...data,
+      });
+
+      await this.getRepository(ProductTag).save(tag);
+    }
+  }
+
+  // 상품 목록 삭제
+  async deleteProduct(id: string) {
+    await this.getRepository(Product).delete(id);
+  }
+
+  // 상품 상세 정보 삭제
+  async deleteProductDetail(id: string) {
+    await this.getRepository(ProductDetail).delete({ productId: id });
+  }
+
+  // 상품 가격 정보 삭제
+  async deleteProductPrice(id: string) {
+    await this.getRepository(ProductPrice).delete({ productId: id });
+  }
+
+  // 상품 카테고리 정보 삭제
+  async deleteProductCategory(id: string) {
+    await this.getRepository(ProductCategory).delete({ productId: id });
+  }
+
+  // 상품 옵션 정보 삭제
+  async deleteProductOptionGroup(id: string) {
+    const productOptionGroup = await this.getRepository(
+      ProductOptionGroup,
+    ).find({
+      where: { productId: id },
+    });
+
+    for (const data of productOptionGroup) {
+      await this.getRepository(ProductOption).delete({
+        optionGroupId: data?.id,
+      });
+    }
+
+    await this.getRepository(ProductOptionGroup).delete({ productId: id });
+  }
+
+  // 상품 이미지 정보 삭제
+  async deleteProductImage(id: string) {
+    await this.getRepository(ProductImage).delete({ productId: id });
+  }
+
+  // 상품 태그 정보 삭제
+  async deleteProductTag(id: string) {
+    await this.getRepository(ProductTag).delete({ productId: id });
+  }
+
+  // 상품 리뷰 목록 삭제
+  async deleteProductReview(id: string) {
+    await this.getRepository(Review).delete({ productId: id });
   }
 }

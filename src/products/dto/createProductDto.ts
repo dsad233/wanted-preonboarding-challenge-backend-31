@@ -145,19 +145,19 @@ export class CreateProductImageDto extends PickType(ProductImage, ['url']) {
 // 상품 태그 생성 DTO
 export class CreateProductTagDto extends PickType(ProductTag, ['tagId']) {}
 
-// 상품 등록에 관련된 DTO 모음
+// 상품 등록 통합 DTO
 export class CreateProductPackageDto {
   @ValidateNested()
   @Type(() => CreateProductDto)
-  products: CreateProductDto;
+  product: CreateProductDto;
 
   @ValidateNested()
   @Type(() => CreateProductDetailDto)
-  productDetails: CreateProductDetailDto;
+  productDetail: CreateProductDetailDto;
 
   @ValidateNested()
   @Type(() => CreateProductPriceDto)
-  productPrices: CreateProductPriceDto;
+  productPrice: CreateProductPriceDto;
 
   @ValidateNested({ each: true })
   @Type(() => CreateProductCategoryDto)
