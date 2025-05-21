@@ -10,7 +10,13 @@ import {
   ProductTag,
   Review,
 } from '@libs/database/entities';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Scope,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -34,7 +40,7 @@ import {
   UpdateProductTagDto,
 } from './dto/updateProductDto';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ProductsRepository extends BaseRepository {
   constructor(
     @InjectDataSource('default') defaultDataSource: DataSource,
