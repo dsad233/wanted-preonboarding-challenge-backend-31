@@ -214,6 +214,8 @@ export class ProductsRepository extends BaseRepository {
         'product.createdAt',
         productRequestDto.sort.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
       );
+    } else {
+      products.orderBy('product.createdAt', 'DESC');
     }
 
     if (productRequestDto.status) {

@@ -14,6 +14,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
 import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
 import { ProductsModule } from './products/products.module';
 import { ProductOptionsModule } from './product-options/product-options.module';
+import { ProductCategoriesModule } from './product-categories/product-categories.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ProductOptionsModule } from './product-options/product-options.module';
     JwtModule,
     ProductsModule,
     ProductOptionsModule,
+    ProductCategoriesModule,
   ],
   controllers: [AppController],
   providers: [
