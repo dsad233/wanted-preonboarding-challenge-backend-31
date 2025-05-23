@@ -195,3 +195,19 @@ export class CreateProductPackageDto {
   @Type(() => CreateProductTagDto)
   productTags: CreateProductTagDto[];
 }
+
+/*
+ * 상품 리뷰
+ */
+
+// 상품 리뷰 등록 DTO
+export class CreateProductReviewDto {
+  @IsNumber()
+  rating: number;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  content: string;
+}

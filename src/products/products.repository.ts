@@ -27,9 +27,13 @@ import {
   CreateProductImageDto,
   CreateProductOptionGroupDto,
   CreateProductPriceDto,
+  CreateProductReviewDto,
   CreateProductTagDto,
 } from './dto/createProductDto';
-import { ProductRequestDto } from './dto/productRequestDto';
+import {
+  ProductRequestDto,
+  ProductReviewRequestDto,
+} from './dto/productRequestDto';
 import {
   UpdateProductCategoryDto,
   UpdateProductDetailDto,
@@ -726,5 +730,132 @@ export class ProductsRepository extends BaseRepository {
   // 상품 리뷰 목록 삭제
   async deleteProductReview(id: string) {
     await this.getRepository(Review).delete({ productId: id });
+  }
+
+  /*
+   * 상품 리뷰
+   */
+
+  // 상품 리뷰 조회
+  async findReviews(
+    id: string,
+    productReviewRequestDto: ProductReviewRequestDto,
+  ) {
+    const request: any = {};
+
+    if (productReviewRequestDto.rating) {
+      request.rating = productReviewRequestDto.rating;
+    }
+
+    const reviews = await this.getRepository(Review).find({
+      relations: { user: true },
+      where: { productId: id, rating: request.rating },
+      order: {
+        createdAt:
+          productReviewRequestDto.sort?.toUpperCase() === 'ASC'
+            ? 'ASC'
+            : 'DESC',
+      },
+      skip: productReviewRequestDto.getSkip(),
+      take: productReviewRequestDto.getTake(),
+      select: {
+        id: true,
+        user: {
+          id: true,
+          name: true,
+          avatarUrl: true,
+        },
+        rating: true,
+        title: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        verifiedPurchase: true,
+        helpfulVotes: true,
+      },
+    });
+
+    let averageRating = 0;
+    let reviewCount = 0;
+    let reviewFive = 0;
+    let reviewFour = 0;
+    let reviewThree = 0;
+    let reviewTwo = 0;
+    let reviewOne = 0;
+    for (const review of reviews) {
+      averageRating += review.rating;
+      reviewCount++;
+      if (review.rating) {
+        if (review.rating === 5) {
+          reviewFive++;
+        } else if (review.rating === 4) {
+          reviewFour++;
+        } else if (review.rating === 3) {
+          reviewThree++;
+        } else if (review.rating === 2) {
+          reviewTwo++;
+        } else if (review.rating === 1) {
+          reviewOne++;
+        }
+      }
+    }
+
+    const result = reviews.map((data) => {
+      return {
+        id: data.id,
+        user: {
+          id: data.user?.id,
+          name: data.user?.name,
+          avatar_url: data.user?.avatarUrl,
+        },
+        rating: data.rating,
+        title: data.title,
+        content: data.content,
+        created_at: data.createdAt,
+        updated_at: data.updatedAt,
+        verified_purchase: data.verifiedPurchase,
+        helpful_votes: data.helpfulVotes,
+      };
+    });
+
+    return {
+      items: result,
+      summary: {
+        average_rating: reviewCount ? averageRating / reviewCount : 0,
+        total_count: reviewCount,
+        distribution: {
+          5: reviewFive,
+          4: reviewFour,
+          3: reviewThree,
+          2: reviewTwo,
+          1: reviewOne,
+        },
+      },
+      pagination: {
+        total_items: reviews.length,
+        total_pages: Math.ceil(
+          reviews.length / productReviewRequestDto.getTake(),
+        ),
+        current_page: productReviewRequestDto.getPage(),
+        per_page: productReviewRequestDto.getTake(),
+      },
+    };
+  }
+
+  // 상품 리뷰 등록
+  async createProductReview(
+    id: string,
+    createProductReviewDto: CreateProductReviewDto,
+    userId: string,
+  ) {
+    const review = this.getRepository(Review).create({
+      productId: id,
+      userId: userId,
+      rating: createProductReviewDto.rating,
+      title: createProductReviewDto.title,
+      content: createProductReviewDto.content,
+    });
+
+    return await this.getRepository(Review).save(review);
   }
 }

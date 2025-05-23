@@ -13,10 +13,18 @@ import { ProductsService } from './products.service';
 import {
   CreateProductImageDto,
   CreateProductPackageDto,
+  CreateProductReviewDto,
 } from './dto/createProductDto';
 import { TransactionInterceptor } from 'src/utils/interceptors/transaction.interceptor';
-import { ProductRequestDto } from './dto/productRequestDto';
+import {
+  ProductRequestDto,
+  ProductReviewRequestDto,
+} from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
+import { ReqUser } from 'src/utils/decorators/user.decorator';
+import { UserPayloadDto } from 'src/auth/dto/userPayloadDto';
+import { plainToClass } from 'class-transformer';
+import { validateOrReject } from 'class-validator';
 
 @Controller('products')
 export class ProductsController {
@@ -59,12 +67,47 @@ export class ProductsController {
     return await this.productsService.delete(id);
   }
 
+  /*
+   * 상품 이미지
+   */
+
   // 상품 이미지 추가
-  @Post('/:id/image')
+  @Post('/:id/images')
   async createImage(
     @Param('id') id: string,
     @Body() createProductImageDto: CreateProductImageDto[],
   ) {
     return await this.productsService.createImage(id, createProductImageDto);
+  }
+
+  /*
+   * 상품 리뷰
+   */
+
+  // 상품 리뷰 조회
+  @Get('/:id/reviews')
+  async findReviews(
+    @Param('id') id: string,
+    @Query() productReviewRequestDto: ProductReviewRequestDto,
+  ) {
+    return await this.productsService.findReviews(id, productReviewRequestDto);
+  }
+
+  // 상품 리뷰 등록
+  @Post('/:id/reviews')
+  async createProductReview(
+    @Param('id') id: string,
+    @Body() createProductReviewDto: CreateProductReviewDto,
+    @ReqUser() payload: UserPayloadDto,
+  ) {
+    const user = plainToClass(UserPayloadDto, payload, {
+      excludeExtraneousValues: true,
+    });
+    await validateOrReject(user);
+    return await this.productsService.createProductReview(
+      id,
+      createProductReviewDto,
+      user.id,
+    );
   }
 }

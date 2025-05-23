@@ -15,6 +15,7 @@ import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
 import { ProductsModule } from './products/products.module';
 import { ProductOptionsModule } from './product-options/product-options.module';
 import { ProductCategoriesModule } from './product-categories/product-categories.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ProductCategoriesModule } from './product-categories/product-categories
     ProductsModule,
     ProductOptionsModule,
     ProductCategoriesModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [
