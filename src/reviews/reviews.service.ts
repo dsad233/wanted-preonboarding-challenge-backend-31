@@ -15,7 +15,13 @@ export class ReviewsService {
 
     return {
       success: true,
-      data: review,
+      data: {
+        id: review.id,
+        rating: review.rating,
+        title: review.title,
+        content: review.content,
+        updated_at: review.updatedAt,
+      },
       message: '리뷰가 성공적으로 수정되었습니다.',
     };
   }
