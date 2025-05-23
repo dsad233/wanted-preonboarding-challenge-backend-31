@@ -120,8 +120,10 @@ export class ProductCategoriesRepository extends BaseRepository {
       products.orderBy('product.createdAt', 'DESC');
     }
 
+    const productsData = await products.getMany();
+
     const productArray = [];
-    for (const product of (await products.getMany()) ?? []) {
+    for (const product of productsData ?? []) {
       let averageRating = 0;
       let ratingCount = 0;
       for (const review of product?.reviews) {
@@ -172,15 +174,12 @@ export class ProductCategoriesRepository extends BaseRepository {
       },
       item: productArray,
       pagination: {
-        pagination: {
-          total_items: (await products.getMany()).length,
-          total_pages: Math.ceil(
-            (await products.getMany()).length /
-              productCategoryRequestDto.getTake(),
-          ),
-          current_page: productCategoryRequestDto.getPage(),
-          per_page: productCategoryRequestDto.getTake(),
-        },
+        total_items: productsData.length,
+        total_pages: Math.ceil(
+          productsData.length / productCategoryRequestDto.getTake(),
+        ),
+        current_page: productCategoryRequestDto.getPage(),
+        per_page: productCategoryRequestDto.getTake(),
       },
     };
   }
