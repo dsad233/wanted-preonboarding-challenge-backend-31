@@ -3,8 +3,12 @@ import { ProductsRepository } from './products.repository';
 import {
   CreateProductImageDto,
   CreateProductPackageDto,
+  CreateProductReviewDto,
 } from './dto/createProductDto';
-import { ProductRequestDto } from './dto/productRequestDto';
+import {
+  ProductRequestDto,
+  ProductReviewRequestDto,
+} from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
 
 @Injectable()
@@ -195,6 +199,10 @@ export class ProductsService {
     };
   }
 
+  /*
+   * 상품 이미지
+   */
+
   // 상품 이미지 추가
   async createImage(
     id: string,
@@ -205,6 +213,46 @@ export class ProductsService {
     return {
       success: true,
       message: '상품 이미지가 성공적으로 추가되었습니다.',
+    };
+  }
+
+  /*
+   * 상품 리뷰
+   */
+
+  // 상품 리뷰 조회
+  async findReviews(
+    id: string,
+    productReviewRequestDto: ProductReviewRequestDto,
+  ) {
+    const reviews = await this.productsRepository.findReviews(
+      id,
+      productReviewRequestDto,
+    );
+
+    return {
+      success: true,
+      data: reviews,
+      message: '상품 리뷰를 성공적으로 조회했습니다.',
+    };
+  }
+
+  // 상품 리뷰 등록
+  async createProductReview(
+    id: string,
+    createProductReviewDto: CreateProductReviewDto,
+    userId: string,
+  ) {
+    const review = await this.productsRepository.createProductReview(
+      id,
+      createProductReviewDto,
+      userId,
+    );
+
+    return {
+      success: true,
+      data: review,
+      message: '리뷰가 성공적으로 등록되었습니다.',
     };
   }
 }

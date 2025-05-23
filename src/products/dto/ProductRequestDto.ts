@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { PaginationRequestDto } from 'src/utils/utils';
 
+// 상품 목록 조회 DTO
 export class ProductRequestDto extends PaginationRequestDto {
   // 상품 상태 필터
   @IsOptional()
@@ -57,4 +58,18 @@ export class ProductRequestDto extends PaginationRequestDto {
   @IsOptional()
   @IsString()
   search?: string;
+}
+
+// 상품 리뷰 조회 DTO
+export class ProductReviewRequestDto extends PaginationRequestDto {
+  // 상품 상태 필터
+  @IsOptional()
+  @IsString()
+  sort?: string;
+
+  // 평점 필터 (1-5)
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  rating?: number;
 }

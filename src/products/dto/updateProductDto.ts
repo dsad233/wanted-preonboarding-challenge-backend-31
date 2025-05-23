@@ -6,6 +6,7 @@ import {
   CreateProductOptionDto,
   CreateProductOptionGroupDto,
   CreateProductPriceDto,
+  CreateProductReviewDto,
   CreateProductTagDto,
 } from './createProductDto';
 import { ValidateNested } from 'class-validator';
@@ -71,3 +72,12 @@ export class UpdateProductPackageDto {
   @Type(() => UpdateProductTagDto)
   productTags: UpdateProductTagDto[];
 }
+
+/*
+ * 상품 리뷰
+ */
+
+// 상품 리뷰 수정 DTO
+export class UpdateProductReviewDto extends PartialType(
+  CreateProductReviewDto,
+) {}
