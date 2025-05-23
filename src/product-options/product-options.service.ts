@@ -8,7 +8,9 @@ export class ProductOptionsService {
   constructor(private productOptionsRepository: ProductOptionsRepository) {}
 
   // 상품 옵션 추가
-  async create(createProductOptionDto: CreateProductOptionDto) {
+  async create(
+    createProductOptionDto: CreateProductOptionDto,
+  ): Promise<object> {
     const option = await this.productOptionsRepository.createProductOption(
       createProductOptionDto,
     );
@@ -29,7 +31,10 @@ export class ProductOptionsService {
   }
 
   // 상품 옵션 정보 수정
-  async update(id: string, updateProductOption: UpdateProductOption) {
+  async update(
+    id: string,
+    updateProductOption: UpdateProductOption,
+  ): Promise<object> {
     const option = await this.productOptionsRepository.updateProductOption(
       id,
       updateProductOption,
@@ -50,7 +55,7 @@ export class ProductOptionsService {
   }
 
   // 상품 옵션 삭제
-  async delete(id: string) {
+  async delete(id: string): Promise<object> {
     await this.productOptionsRepository.deleteProductOption(id);
     return {
       success: true,

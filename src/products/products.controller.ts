@@ -76,7 +76,7 @@ export class ProductsController {
   async createImage(
     @Param('id') id: string,
     @Body() createProductImageDto: CreateProductImageDto[],
-  ) {
+  ): Promise<object> {
     return await this.productsService.createImage(id, createProductImageDto);
   }
 
@@ -89,7 +89,7 @@ export class ProductsController {
   async findReviews(
     @Param('id') id: string,
     @Query() productReviewRequestDto: ProductReviewRequestDto,
-  ) {
+  ): Promise<object> {
     return await this.productsService.findReviews(id, productReviewRequestDto);
   }
 
@@ -99,7 +99,7 @@ export class ProductsController {
     @Param('id') id: string,
     @Body() createProductReviewDto: CreateProductReviewDto,
     @ReqUser() payload: UserPayloadDto,
-  ) {
+  ): Promise<object> {
     const user = plainToClass(UserPayloadDto, payload, {
       excludeExtraneousValues: true,
     });

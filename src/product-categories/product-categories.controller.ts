@@ -12,7 +12,7 @@ export class ProductCategoriesController {
   // 카테고리 목록 조회
   @Public()
   @Get()
-  async find(@Query('level') level: number) {
+  async find(@Query('level') level: number): Promise<object> {
     return await this.productCategoriesService.find(level);
   }
 
@@ -22,7 +22,7 @@ export class ProductCategoriesController {
   async findOne(
     @Param('id') id: string,
     @Query() productCategoryRequestDto: ProductCategoryRequestDto,
-  ) {
+  ): Promise<object> {
     return await this.productCategoriesService.findOne(
       id,
       productCategoryRequestDto,

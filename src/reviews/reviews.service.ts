@@ -7,7 +7,10 @@ export class ReviewsService {
   constructor(private reviewsRepository: ReviewsRepository) {}
 
   // 상품 리뷰 수정
-  async update(id: string, updateProductReviewDto: UpdateProductReviewDto) {
+  async update(
+    id: string,
+    updateProductReviewDto: UpdateProductReviewDto,
+  ): Promise<object> {
     const review = await this.reviewsRepository.updateProductReview(
       id,
       updateProductReviewDto,
@@ -27,7 +30,7 @@ export class ReviewsService {
   }
 
   // 상품 리뷰 삭제
-  async delete(id: string) {
+  async delete(id: string): Promise<object> {
     await this.reviewsRepository.deleteProductReview(id);
 
     return {

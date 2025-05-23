@@ -9,7 +9,9 @@ export class ProductOptionsController {
 
   // 상품 옵션 추가
   @Post()
-  async create(@Body() createProductOptionDto: CreateProductOptionDto) {
+  async create(
+    @Body() createProductOptionDto: CreateProductOptionDto,
+  ): Promise<object> {
     return await this.productOptionsService.create(createProductOptionDto);
   }
 
@@ -18,13 +20,13 @@ export class ProductOptionsController {
   async update(
     @Param('id') id: string,
     @Body() updateProductOption: UpdateProductOption,
-  ) {
+  ): Promise<object> {
     return await this.productOptionsService.update(id, updateProductOption);
   }
 
   // 상품 옵션 삭제
   @Delete('/:id')
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id') id: string): Promise<object> {
     return await this.productOptionsService.delete(id);
   }
 }

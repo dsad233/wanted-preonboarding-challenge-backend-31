@@ -207,7 +207,7 @@ export class ProductsService {
   async createImage(
     id: string,
     createProductImageDto: CreateProductImageDto[],
-  ) {
+  ): Promise<object> {
     await this.productsRepository.createProductImage(id, createProductImageDto);
 
     return {
@@ -224,7 +224,7 @@ export class ProductsService {
   async findReviews(
     id: string,
     productReviewRequestDto: ProductReviewRequestDto,
-  ) {
+  ): Promise<object> {
     const reviews = await this.productsRepository.findReviews(
       id,
       productReviewRequestDto,
@@ -242,7 +242,7 @@ export class ProductsService {
     id: string,
     createProductReviewDto: CreateProductReviewDto,
     userId: string,
-  ) {
+  ): Promise<object> {
     const review = await this.productsRepository.createProductReview(
       id,
       createProductReviewDto,

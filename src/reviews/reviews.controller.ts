@@ -11,7 +11,7 @@ export class ReviewsController {
   async update(
     @Param('id') id: string,
     @Body() updateProductReviewDto: UpdateProductReviewDto,
-  ) {
+  ): Promise<object> {
     return await this.reviewsService.update(id, updateProductReviewDto);
   }
 

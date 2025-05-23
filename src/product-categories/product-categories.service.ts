@@ -9,7 +9,7 @@ export class ProductCategoriesService {
   ) {}
 
   // 카테고리 목록 조회
-  async find(level: number) {
+  async find(level: number): Promise<object> {
     const category = await this.productCategoriesRepository.find(level);
 
     return {
@@ -23,7 +23,7 @@ export class ProductCategoriesService {
   async findOne(
     id: string,
     productCategoryRequestDto: ProductCategoryRequestDto,
-  ) {
+  ): Promise<object> {
     const category =
       await this.productCategoriesRepository.findOneCategoryAndProduct(
         id,
