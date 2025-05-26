@@ -1,8 +1,14 @@
-import { User } from '@libs/database/entities';
-import { PickType } from '@nestjs/mapped-types';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateUserDto extends PickType(User, ['name', 'email']) {
+export class CreateUserDto {
+  @IsString()
+  @MaxLength(100, { message: 'Max Length 100' })
+  name: string;
+
+  @IsString()
+  @MaxLength(100, { message: 'Max Length 100' })
+  email: string;
+
   @IsOptional()
   @IsString()
   avatarUrl?: string;
