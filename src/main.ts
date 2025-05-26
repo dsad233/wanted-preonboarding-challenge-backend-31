@@ -20,9 +20,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(configService.getOrThrow<number>('port') ?? 3000);
+  await app.listen(configService.get<number>('port') ?? 3000);
   console.log(
-    `현재 애플리케이션 실행 환경: ${configService.getOrThrow<number>('nodeEnv')}, ${configService.getOrThrow<number>('port')}`,
+    `현재 애플리케이션 실행 환경: ${configService.get<number>('nodeEnv')}, ${configService.get<number>('port')}`,
   );
 }
 bootstrap();

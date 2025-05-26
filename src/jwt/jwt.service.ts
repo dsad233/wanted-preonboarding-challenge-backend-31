@@ -46,7 +46,7 @@ export class JwtService {
       } else if (err instanceof JsonWebTokenError) {
         throw new HttpException('JsonWebTokenError', HttpStatus.UNAUTHORIZED);
       } else if (err instanceof NotBeforeError) {
-        throw new HttpException('ExpireError', HttpStatus.UNAUTHORIZED);
+        throw new HttpException('NotBeforeError', HttpStatus.UNAUTHORIZED);
       } else {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }

@@ -8,7 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PaginationRequestDto } from 'src/common/utils';
+import { PaginationRequestDto } from 'src/common/pagination/paginationRequestDto';
 
 // 상품 목록 조회 DTO
 export class ProductRequestDto extends PaginationRequestDto {

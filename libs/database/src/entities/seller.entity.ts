@@ -30,14 +30,6 @@ export class Seller extends BaseEntity {
     precision: 3,
     scale: 2,
     nullable: true,
-    transformer: {
-      to(data: number): number {
-        return data;
-      },
-      from(data: string): number {
-        return parseFloat(data);
-      },
-    },
     comment: '평점',
   })
   rating: number;

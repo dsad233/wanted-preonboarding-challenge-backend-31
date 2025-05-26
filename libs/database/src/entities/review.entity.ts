@@ -36,7 +36,6 @@ export class Review extends BaseEntity {
   })
   userId: string;
 
-  // 평점 enum으로 관리 예정 // rating BETWEEN 1 AND 5
   @Column('int', {
     name: 'rating',
     nullable: false,
