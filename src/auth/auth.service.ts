@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { CreateUserDto } from './dto/createUserDto';
-import { EmailRegExp } from 'src/utils/utils';
+import { EmailRegExp } from 'src/common/utils';
 import { LoginUserDto } from './dto/loginUserDto';
 import { RedisRepository } from 'src/redis/redis.repository';
 import { JwtService } from 'src/jwt/jwt.service';

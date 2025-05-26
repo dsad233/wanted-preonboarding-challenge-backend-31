@@ -6,7 +6,7 @@ import {
   NotBeforeError,
   TokenExpiredError,
 } from '@nestjs/jwt';
-import { JwtPayload } from 'src/utils/interfaces/jwt.payload.interface';
+import { JwtPayload } from 'src/common/interfaces/jwt.payload.interface';
 
 @Injectable()
 export class JwtService {

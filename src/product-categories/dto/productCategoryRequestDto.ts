@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
-import { PaginationRequestDto } from 'src/utils/utils';
+import { PaginationRequestDto } from 'src/common/utils';
 
 export class ProductCategoryRequestDto extends PaginationRequestDto {
   // 상품 상태 필터

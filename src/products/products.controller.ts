@@ -15,13 +15,13 @@ import {
   CreateProductPackageDto,
   CreateProductReviewDto,
 } from './dto/createProductDto';
-import { TransactionInterceptor } from 'src/utils/interceptors/transaction.interceptor';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 import {
   ProductRequestDto,
   ProductReviewRequestDto,
 } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
-import { ReqUser } from 'src/utils/decorators/user.decorator';
+import { ReqUser } from 'src/common/decorators/user.decorator';
 import { UserPayloadDto } from 'src/auth/dto/userPayloadDto';
 import { plainToClass } from 'class-transformer';
 import { validateOrReject } from 'class-validator';

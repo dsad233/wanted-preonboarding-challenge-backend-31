@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { ENTITY_MANAGER_KEY } from 'src/utils/interceptors/transaction.interceptor';
+import { ENTITY_MANAGER_KEY } from 'src/common/interceptors/transaction.interceptor';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 
 @Injectable()

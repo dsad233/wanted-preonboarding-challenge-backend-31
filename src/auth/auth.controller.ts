@@ -2,11 +2,11 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/createUserDto';
 import { LoginUserDto } from './dto/loginUserDto';
-import { ReqUser } from 'src/utils/decorators/user.decorator';
+import { ReqUser } from 'src/common/decorators/user.decorator';
 import { UserPayloadDto } from './dto/userPayloadDto';
 import { plainToClass } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { Public } from 'src/utils/decorators/ispublic.decorator';
+import { Public } from 'src/common/decorators/ispublic.decorator';
 
 @Controller('auth')
 export class AuthController {

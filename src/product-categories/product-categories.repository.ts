@@ -4,7 +4,7 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ProductCategoryRequestDto } from './dto/productRequestDto';
+import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductCategoriesRepository extends BaseRepository {

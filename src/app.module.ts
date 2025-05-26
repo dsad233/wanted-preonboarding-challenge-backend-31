@@ -11,7 +11,7 @@ import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
-import { LoggerMiddleware } from './utils/middlewares/logger.middleware';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ProductsModule } from './products/products.module';
 import { ProductOptionsModule } from './product-options/product-options.module';
 import { ProductCategoriesModule } from './product-categories/product-categories.module';

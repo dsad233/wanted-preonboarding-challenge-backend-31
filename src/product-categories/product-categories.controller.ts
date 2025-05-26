@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProductCategoriesService } from './product-categories.service';
-import { Public } from 'src/utils/decorators/ispublic.decorator';
-import { ProductCategoryRequestDto } from './dto/productRequestDto';
+import { Public } from 'src/common/decorators/ispublic.decorator';
+import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 
 @Controller('product-categories')
 export class ProductCategoriesController {
