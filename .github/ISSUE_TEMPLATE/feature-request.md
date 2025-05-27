@@ -1,5 +1,5 @@
 ---
-name: 기능 요청 이슈
+name: Feature request
 about: 기능 요청 이슈 생성
 title: ''
 labels: ''

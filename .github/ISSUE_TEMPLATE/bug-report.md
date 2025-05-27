@@ -1,5 +1,5 @@
 ---
-name: 버그 리포트 이슈
+name: Bug report
 about: 버그 리포트 생성
 title: ''
 labels: ''
