@@ -10,7 +10,7 @@ export class User extends BaseEntity {
     name: 'name',
     length: 100,
     nullable: false,
-    comment: '유저이름',
+    comment: '유저 이름',
   })
   name: string;
 
@@ -19,7 +19,7 @@ export class User extends BaseEntity {
     length: 100,
     nullable: false,
     unique: true,
-    comment: '유저이름',
+    comment: '유저 이메일',
   })
   email: string;
 

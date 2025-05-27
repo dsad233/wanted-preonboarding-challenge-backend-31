@@ -125,10 +125,10 @@ export class ProductCategoriesRepository extends BaseRepository {
     const productArray = [];
     for (const product of productsData ?? []) {
       let averageRating = 0;
-      let ratingCount = 0;
+      let reviewCount = 0;
       for (const review of product?.reviews) {
         averageRating += review.rating;
-        ratingCount++;
+        reviewCount++;
       }
 
       productArray.push({
@@ -151,8 +151,8 @@ export class ProductCategoriesRepository extends BaseRepository {
           id: product?.seller?.id,
           name: product?.seller?.name,
         },
-        rating: ratingCount ? averageRating / ratingCount : 0,
-        review_count: ratingCount,
+        rating: reviewCount ? averageRating / reviewCount : 0,
+        review_count: reviewCount,
         status: product?.status,
         created_at: product?.createdAt,
       });

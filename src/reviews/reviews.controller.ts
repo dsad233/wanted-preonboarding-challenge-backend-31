@@ -17,7 +17,7 @@ export class ReviewsController {
 
   // 상품 리뷰 삭제
   @Delete('/:id')
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id') id: string): Promise<object> {
     return await this.reviewsService.delete(id);
   }
 }

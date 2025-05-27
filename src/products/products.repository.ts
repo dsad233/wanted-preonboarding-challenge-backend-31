@@ -304,8 +304,7 @@ export class ProductsRepository extends BaseRepository {
         review_count: reviewCount,
         // inStock 재고 유무 쿼리 값이 발생한다면, 재고 존재 유무 조회 (boolean)
         in_stock: productRequestDto.inStock
-          ? // 이거 고려 해봐야 함 -> 배열 처리로 해서 데이터 조회를 시도 할 것인지
-            data.productOptionGroups[0]?.productOptions[0]?.stock > 0
+          ? data.productOptionGroups[0]?.productOptions[0]?.stock > 0
             ? true
             : false
           : undefined,
@@ -416,7 +415,7 @@ export class ProductsRepository extends BaseRepository {
     // reviews 데이터 가공 처리
     const review = result.reviews;
     let averageRating = 0;
-    let ratingCount = 0;
+    let reviewCount = 0;
     let ratingFive = 0;
     let ratingFour = 0;
     let ratingThree = 0;
@@ -435,7 +434,7 @@ export class ProductsRepository extends BaseRepository {
         ratingOne++;
       }
       averageRating += data.rating;
-      ratingCount++;
+      reviewCount++;
     }
 
     // 관련 추천 상품 조회
@@ -521,19 +520,20 @@ export class ProductsRepository extends BaseRepository {
         currency: result.productPrices[0]?.currency,
         tax_rate: result.productPrices[0]?.taxRate,
         // 할인율
-        discount_percentage:
+        discount_percentage: Math.floor(
           ((result.productPrices[0]?.basePrice -
             result.productPrices[0]?.salePrice) /
             result.productPrices[0]?.basePrice) *
-          100,
+            100,
+        ),
       },
       categories: categoryArray,
       option_groups: productOptionGroupArray,
       images: productImageArray,
       tags: productTagArray,
       rating: {
-        average: averageRating / ratingCount,
-        count: ratingCount,
+        average: reviewCount ? averageRating / reviewCount : 0,
+        count: reviewCount,
         distribution: {
           5: ratingFive,
           4: ratingFour,

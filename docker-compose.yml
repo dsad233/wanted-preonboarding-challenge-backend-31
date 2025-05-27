@@ -26,3 +26,19 @@ services:
       - 'name=redis'
       - 'mode=standalone'
     restart: always
+  server-app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres-db
+      - redis
+    volumes:
+      - ./server:/build/app
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    env_file:
+      - .env.production
+    restart: always

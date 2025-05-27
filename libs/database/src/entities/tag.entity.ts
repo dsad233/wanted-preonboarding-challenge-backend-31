@@ -21,7 +21,7 @@ export class Tag {
     length: 100,
     nullable: false,
     unique: true,
-    comment: '태그명',
+    comment: 'URL 슬러그',
   })
   slug: string;
 
