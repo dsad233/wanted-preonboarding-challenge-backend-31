@@ -2,9 +2,8 @@ services:
   postgres-db:
     image: postgres:15
     container_name: postgres-15
-    restart: always
     ports:
-      - '5432:5432'
+      - '5432:${DB_PORT}'
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -13,6 +12,9 @@ services:
     volumes:
       - ./db/postgres-data:/var/lib/postgresql/data
     platform: linux/x86_64
+    restart: always
+    networks:
+      - server
   redis:
     image: redis:7.4.3
     container_name: redis-wanted-7.4.3
@@ -26,19 +28,27 @@ services:
       - 'name=redis'
       - 'mode=standalone'
     restart: always
-  server-app:
+    networks:
+      - server
+  server:
     build:
       context: ./
       dockerfile: Dockerfile
+    container_name: server-app
     depends_on:
       - postgres-db
       - redis
     volumes:
       - ./server:/build/app
     expose:
-      - 3000
+      - ${PORT}
     ports:
-      - 3000:3000
+      - 3000:${PORT}
     env_file:
       - .env.production
     restart: always
+    networks:
+      - server
+networks:
+  server:
+    driver: bridge

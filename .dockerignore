@@ -1,5 +1,7 @@
 # Ignore node modules
 /db
+/wanted
+/test
 
 # Ignore logs
 npm-debug.log
@@ -7,6 +9,7 @@ npm-error.log
 
 # Ignore the Git repository and its logs
 .git
+.github
 .gitignore
 .gitattributes
 
