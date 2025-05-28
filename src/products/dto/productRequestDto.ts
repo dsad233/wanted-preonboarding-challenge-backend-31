@@ -49,8 +49,7 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 재고 유무 필터
   @IsOptional()
-  // truty 로 인한 문제로 인하여, 직접 변환을 시도 하여야 함.
-  @Transform(({ value }) => (value === 'true' ? true : false))
+  @Type(() => Boolean)
   @IsBoolean()
   inStock?: boolean;
 
