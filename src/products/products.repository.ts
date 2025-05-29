@@ -209,7 +209,8 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('productOptionGroups.productOptions', 'productOptions')
       .where('product.status != :status', {
         status: STATUS.ProductStatus.DELETED,
-      });
+      })
+      .cache(60000);
 
     if (productRequestDto.page) {
       products.skip(productRequestDto.getSkip());
@@ -342,7 +343,8 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.productTags', 'productTags')
       .leftJoinAndSelect('productTags.tag', 'tag')
-      .leftJoinAndSelect('product.reviews', 'reviews');
+      .leftJoinAndSelect('product.reviews', 'reviews')
+      .cache(30000);
 
     const result = await product.getOne();
     if (!result) {
