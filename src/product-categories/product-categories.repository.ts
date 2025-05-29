@@ -5,6 +5,7 @@ import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
+import { STATUS } from '@libs/enums';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductCategoriesRepository extends BaseRepository {
@@ -101,7 +102,10 @@ export class ProductCategoriesRepository extends BaseRepository {
       .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
-      .where('category.id = :id', { id: id });
+      .where('product.status != status', {
+        status: STATUS.ProductStatus.DELETED,
+      })
+      .andWhere('category.id = :id', { id: id });
 
     if (productCategoryRequestDto.page) {
       products.skip(productCategoryRequestDto.getSkip());

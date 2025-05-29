@@ -2,6 +2,7 @@
 /db
 /wanted
 /test
+/server
 
 # Ignore logs
 npm-debug.log

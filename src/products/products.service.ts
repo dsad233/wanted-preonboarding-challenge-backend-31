@@ -199,6 +199,16 @@ export class ProductsService {
     };
   }
 
+  // 상품 소프트 삭제
+  async softDelete(id: string): Promise<object> {
+    await this.productsRepository.softDeleteProduct(id);
+
+    return {
+      success: true,
+      message: '상품이 성공적으로 삭제되었습니다.',
+    };
+  }
+
   /*
    * 상품 이미지
    */

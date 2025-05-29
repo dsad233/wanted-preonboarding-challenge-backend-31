@@ -19,7 +19,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, Not } from 'typeorm';
 import {
   CreateProductCategoryDto,
   CreateProductDetailDto,
@@ -43,6 +43,7 @@ import {
   UpdateProductPriceDto,
   UpdateProductTagDto,
 } from './dto/updateProductDto';
+import { STATUS } from '@libs/enums';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ProductsRepository extends BaseRepository {
@@ -66,6 +67,9 @@ export class ProductsRepository extends BaseRepository {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.productPrices', 'productPrices')
+      .where('product.status != status', {
+        status: STATUS.ProductStatus.DELETED,
+      })
       .where('product.slug LIKE :slug', { slug: `%${slug}` });
 
     return await product.getMany();
@@ -73,7 +77,9 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 ID 조회
   async findOneProductId(id: string) {
-    return await this.getRepository(Product).findOneBy({ id: id });
+    return await this.getRepository(Product).findOne({
+      where: { id: id, status: Not(STATUS.ProductStatus.DELETED) },
+    });
   }
 
   // 상품 생성
@@ -200,10 +206,10 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
-      .leftJoinAndSelect(
-        'productOptionGroups.productOptions',
-        'productOptions',
-      );
+      .leftJoinAndSelect('productOptionGroups.productOptions', 'productOptions')
+      .where('product.status != :status', {
+        status: STATUS.ProductStatus.DELETED,
+      });
 
     if (productRequestDto.page) {
       products.skip(productRequestDto.getSkip());
@@ -321,6 +327,9 @@ export class ProductsRepository extends BaseRepository {
     const product = this.getRepository(Product)
       .createQueryBuilder('product')
       .where('product.id = :id', { id: id })
+      .andWhere('product.status != :status', {
+        status: STATUS.ProductStatus.DELETED,
+      })
       .innerJoinAndSelect('product.seller', 'seller')
       .innerJoinAndSelect('product.brand', 'brand')
       .innerJoinAndSelect('product.productDetails', 'productDetails')
@@ -549,9 +558,7 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 목록 수정
   async updateProduct(id: string, updateProductDto: UpdateProductDto) {
-    const product = await this.getRepository(Product).findOneBy({
-      id: id,
-    });
+    const product = await this.getRepository(Product).findOneBy({ id: id });
 
     const merge = this.getRepository(Product).merge(product, updateProductDto);
 
@@ -683,6 +690,18 @@ export class ProductsRepository extends BaseRepository {
   // 상품 목록 삭제
   async deleteProduct(id: string) {
     await this.getRepository(Product).delete(id);
+  }
+
+  // 상품 소프트 삭제
+  async softDeleteProduct(id: string) {
+    await this.getRepository(Product).update(
+      {
+        id: id,
+      },
+      {
+        status: STATUS.ProductStatus.DELETED,
+      },
+    );
   }
 
   // 상품 상세 정보 삭제

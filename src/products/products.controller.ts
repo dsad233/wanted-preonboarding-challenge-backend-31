@@ -67,6 +67,12 @@ export class ProductsController {
     return await this.productsService.delete(id);
   }
 
+  // 상품 소프트 삭제
+  @Delete('/soft/:id')
+  async softDelete(@Param('id') id: string): Promise<object> {
+    return await this.productsService.softDelete(id);
+  }
+
   /*
    * 상품 이미지
    */
