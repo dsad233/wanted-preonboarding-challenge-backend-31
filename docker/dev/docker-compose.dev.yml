@@ -10,42 +10,46 @@ services:
       POSTGRES_DB: ${DB_NAME}
       TZ: ${TZ}
     volumes:
-      - ./db/postgres-data:/var/lib/postgresql/data
+      - ../../db/postgres-data:/var/lib/postgresql/data
     platform: linux/x86_64
     restart: always
     networks:
       - server
   redis:
     image: redis:7.4.3
-    container_name: redis-wanted-7.4.3
+    container_name: redis-7.4.3
     ports:
       - 6379:${REDIS_PORT}
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./db/redis/data:/data
-      - ./db/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+      - ../../db/redis/data:/data
+      - ../../db/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
     labels:
       - 'name=redis'
       - 'mode=standalone'
     restart: always
     networks:
       - server
-  server:
+  server-app-dev:
     build:
-      context: ./
-      dockerfile: Dockerfile
-    container_name: server-app
+      context: ../../
+      dockerfile: docker/dev/Dockerfile.dev
+    container_name: server-app-dev
     depends_on:
       - postgres-db
       - redis
     volumes:
-      - ./server:/build/app
+      - ../../.:/home/app/dev
+      - /home/app/dev/node_modules
     expose:
       - ${PORT}
     ports:
       - 3000:${PORT}
     env_file:
-      - .env.production
+      - ../../.env.development
+    command: npm run start:dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     restart: always
     networks:
       - server

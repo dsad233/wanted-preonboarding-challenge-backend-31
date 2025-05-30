@@ -9,7 +9,7 @@ RUN apt-get update \
 
 USER node
 
-WORKDIR /home/app
+WORKDIR /home/app/prod
 
 COPY --chown=node:node package*.json ./
 
@@ -17,24 +17,23 @@ RUN npm ci
 
 COPY --chown=node:node ./ ./
 
-RUN chmod +x docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 RUN npx nest build
 
 # Stage 2: Runtime
 FROM node:22.16.0
 
-WORKDIR /home/app
+WORKDIR /home/app/prod
 
-COPY --from=builder /home/app/node_modules ./node_modules
-COPY --from=builder /home/app/libs ./libs
-COPY --from=builder /home/app/src ./src
-COPY --from=builder /home/app/dist ./dist
-COPY --from=builder /home/app/docker-entrypoint.sh ./
+COPY --from=builder /home/app/prod/node_modules ./node_modules
+COPY --from=builder /home/app/prod/package*.json ./
+COPY --from=builder /home/app/prod/libs ./libs
+COPY --from=builder /home/app/prod/src ./src
+COPY --from=builder /home/app/prod/dist ./dist
+COPY --from=builder /home/app/prod/docker-entrypoint.sh ./
 COPY --from=builder /usr/local/bin/dockerize /usr/local/bin/dockerize
-
-COPY .env.production .env.production
 
 EXPOSE 3000
 
-ENTRYPOINT ./docker-entrypoint.sh
+ENTRYPOINT ["./docker-entrypoint.sh"]

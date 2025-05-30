@@ -20,6 +20,8 @@ Dockerfile
 
 # Ignore environment files
 .env
+.env.development
+.env.production
 
 # Ignore other unnecessary files
 README.md
