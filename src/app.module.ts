@@ -20,7 +20,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env', '.env.production'],
+      envFilePath: ['.env', '.env.production', '.env.development'],
       isGlobal: true,
       cache: true,
       load: [configuration],
