@@ -1,0 +1,12 @@
+# Content-Type 이슈 
+# Link: https://github.com/elastic/elasticsearch-ruby/issues/2665#issue-3015175124 
+
+FROM fluent/fluentd:v1.18-debian
+
+USER root
+
+RUN apt update -y
+
+RUN gem install fluent-plugin-elasticsearch --no-document
+
+USER fluent

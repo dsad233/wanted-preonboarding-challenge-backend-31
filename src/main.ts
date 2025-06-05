@@ -3,17 +3,16 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from './common/middlewares/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { winstonLogger } from './common/loggers/winston';
 
 declare const module: any;
 
 async function bootstrap() {
-  // logger 로그 레벨 참고: https://cdragon.tistory.com/entry/NestJS-Logging-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0-feat-winston
   const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'verbose', 'debug'],
+    bufferLogs: false,
+    logger: winstonLogger,
   });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

@@ -2,7 +2,7 @@ import * as Joi from 'joi';
 export const ValidationSchema = Joi.object({
   // 기본 설정
   NODE_ENV: Joi.string()
-    .valid('development', 'production', 'test', 'provision', 'local')
+    .valid('production', 'development', 'local', 'test', 'provision')
     .default('local'),
   TZ: Joi.string().required(),
   PORT: Joi.number().port().default(3000),
@@ -23,4 +23,10 @@ export const ValidationSchema = Joi.object({
   JWT_REFRESH_EXP: Joi.string().required(),
   JWT_ACCESS_REDIS_TTL: Joi.number().required(),
   JWT_REFRESH_REDIS_TTL: Joi.number().required(),
+  // Fluent 설정
+  FLUENTD_HOST: Joi.string().required(),
+  FLUENTD_PORT: Joi.number().required(),
+  FLUENTD_TAG: Joi.string().required(),
+  FLUENTD_TIMEOUT: Joi.number().required(),
+  FLUENTD_RECONNECTINTERVAL: Joi.number().required(),
 });

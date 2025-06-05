@@ -1,0 +1,79 @@
+# 참고: https://github.com/chachamelon/EFK-stack
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.2
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - 'discovery.type=single-node'
+      # 메모리 스왑 방지
+      - 'bootstrap.memory_lock=true'
+      # 메모리 최소 512MB ~ 최대 2GB 여유 공간 설정
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx2g'
+        # 인증 비활성화 (TLS/SSL)
+      - xpack.security.enabled=false
+    volumes:
+      - type: bind
+        source: '../../elasticsearch/config/elasticsearch.yml'
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+    ulimits:
+      memlock:
+        # 최소, 최대 락 제한 X -> 오로지 서버 메모리로만 동작 가능하게
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - '9200:${ELASTICSEARCH_PORT}'
+    restart: always
+    networks:
+      - server
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:9.0.2
+    volumes:
+      - type: bind
+        source: '../../kibana/config/kibana.yml'
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    depends_on:
+      elasticsearch:
+        # elasticsearch 서비스가 정상적으로 구동된 후 health check
+        condition: service_healthy
+    ports:
+      - 5601:${KIBANA_PORT}
+    environment:
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch:${ELASTICSEARCH_PORT}'
+    restart: always
+    networks:
+      - server
+  fluentd:
+    build:
+      context: ../../
+      dockerfile: docker/efk/Dockerfile-fluentd
+    container_name: fluentd
+    volumes:
+      - ../../fluentd/conf:/fluentd/etc
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - '24224:${FLUENT_PORT}'
+      - '24224:${FLUENT_PORT}/udp'
+    environment:
+      FLUENT_PORT: ${FLUENT_PORT}
+      ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT}
+    restart: always
+    networks:
+      - server
+networks:
+  server:
+    driver: bridge
