@@ -43,7 +43,7 @@ services:
     expose:
       - ${PORT}
     ports:
-      - 3000:${PORT}
+      - 3002:${PORT}
     env_file:
       - ../../.env.production
     restart: always

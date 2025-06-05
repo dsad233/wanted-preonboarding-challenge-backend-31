@@ -66,10 +66,10 @@ services:
       elasticsearch:
         condition: service_healthy
     ports:
-      - '24224:${FLUENT_PORT}'
-      - '24224:${FLUENT_PORT}/udp'
+      - '24224:${FLUENTD_PORT}'
+      - '24224:${FLUENTD_PORT}/udp'
     environment:
-      FLUENT_PORT: ${FLUENT_PORT}
+      FLUENTD_PORT: ${FLUENTD_PORT}
       ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT}
     restart: always
     networks:
