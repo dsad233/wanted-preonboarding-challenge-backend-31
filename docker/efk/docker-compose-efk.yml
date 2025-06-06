@@ -77,3 +77,4 @@ services:
 networks:
   server:
     driver: bridge
+    external: true
