@@ -1,12 +1,12 @@
 import * as Transport from 'winston-transport';
-import * as fluentLogger from 'fluent-logger';
+import * as FluentLogger from 'fluent-logger';
 
 export class FluentTransport extends Transport {
-  private fluent: typeof fluentLogger;
+  private fluent: typeof FluentLogger;
 
   constructor(opts: any) {
     super(opts);
-    this.fluent = fluentLogger;
+    this.fluent = FluentLogger;
     this.fluent.configure(opts.tag, {
       host: opts.host,
       port: opts.port,
