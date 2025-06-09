@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -18,6 +19,10 @@ import { ProductTag } from './product-tag.entity';
 import { Review } from './review.entity';
 import { STATUS } from '@libs/enums';
 
+@Index('INDEX_PRODUCT_CREATEDAT', ['createdAt'])
+@Index('INDEX_PRODUCT_NAME', ['name'])
+@Index('INDEX_PRODUCT_SLUG', ['slug'], { unique: true })
+@Index('INDEX_PRODUCT_STATUS', ['status'])
 @Entity({
   name: 'products',
 })

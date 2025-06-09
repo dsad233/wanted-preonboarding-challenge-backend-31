@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -8,6 +9,9 @@ import {
 import { Product } from './product.entity';
 import { Category } from './category.entity';
 
+@Index('INDEX_PRODUCT_CATEGORY_PRODUCTID', ['productId'])
+@Index('INDEX_PRODUCT_CATEGORY_CATEGORYID', ['categoryId'])
+@Index('INDEX_PRODUCT_CATEGORY_ISPRIMARY', ['isPrimary'])
 @Entity({
   name: 'product_categories',
 })

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   UpdateDateColumn,
@@ -9,6 +10,10 @@ import { BaseEntity } from './base.entity';
 import { Product } from './product.entity';
 import { User } from './user.entity';
 
+@Index('INDEX_REVIEW_CREATEDAT', ['createdAt'])
+@Index('INDEX_REVIEW_PRODUCTID', ['productId'])
+@Index('INDEX_REVIEW_RATING', ['rating'])
+@Index('INDEX_REVIEW_TITLE', ['title'])
 @Entity({
   name: 'reviews',
 })

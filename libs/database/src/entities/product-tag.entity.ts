@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -8,6 +9,8 @@ import {
 import { Product } from './product.entity';
 import { Tag } from './tag.entity';
 
+@Index('INDEX_PRODUCT_TAG_PRODUCTID', ['productId'])
+@Index('INDEX_PRODUCT_TAG_TAGID', ['tagId'])
 @Entity({
   name: 'product_tags',
 })

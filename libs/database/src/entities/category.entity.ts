@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -8,6 +9,10 @@ import {
 } from 'typeorm';
 import { ProductCategory } from './product-category.entity';
 
+@Index('INDEX_CATEGORY_NAME', ['name'])
+@Index('INDEX_CATEGORY_SLUG', ['slug'], { unique: true })
+@Index('INDEX_CATEGORY_PARENTID', ['parentId'])
+@Index('INDEX_CATEGORY_LEVEL', ['level'])
 @Entity({
   name: 'categories',
 })

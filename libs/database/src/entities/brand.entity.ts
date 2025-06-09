@@ -1,6 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Product } from './product.entity';
 
+@Index('INDEX_BRAND_NAME', ['name'])
+@Index('INDEX_BRAND_SLUG', ['slug'], { unique: true })
 @Entity({
   name: 'brands',
 })

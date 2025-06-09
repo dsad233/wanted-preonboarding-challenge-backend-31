@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -9,6 +10,9 @@ import {
 import { Product } from './product.entity';
 import { ProductOption } from './product-option.entity';
 
+@Index('INDEX_PRODUCT_OPTION_GROUP_PRODUCTID', ['productId'])
+@Index('INDEX_PRODUCT_OPTION_GROUP_NAME', ['name'])
+@Index('INDEX_PRODUCT_OPTION_GROUP_ORDER', ['displayOrder'])
 @Entity({
   name: 'product_option_groups',
 })

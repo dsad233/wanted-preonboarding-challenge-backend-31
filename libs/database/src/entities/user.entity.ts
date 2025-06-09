@@ -1,7 +1,9 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Review } from './review.entity';
 
+@Index('INDEX_USER_NAME', ['name'])
+@Index('INDEX_USER_EMAIL', ['email'], { unique: true })
 @Entity({
   name: 'users',
 })

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -8,6 +9,10 @@ import {
 import { Product } from './product.entity';
 import { ProductOption } from './product-option.entity';
 
+@Index('INDEX_PRODUCT_IMAGE_PRODUCTID', ['productId'])
+@Index('INDEX_PRODUCT_IMAGE_ISPRIMARY', ['isPrimary'])
+@Index('INDEX_PRODUCT_IMAGE_OPTIONID', ['optionId'])
+@Index('INDEX_PRODUCT_IMAGE_ORDER', ['displayOrder'])
 @Entity({
   name: 'product_images',
 })

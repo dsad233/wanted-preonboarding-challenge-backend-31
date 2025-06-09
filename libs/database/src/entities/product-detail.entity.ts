@@ -1,12 +1,14 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
 
+@Index('INDEX_PRODUCT_DETAIL_PRODUCTID', ['productId'])
 @Entity({
   name: 'product_details',
 })

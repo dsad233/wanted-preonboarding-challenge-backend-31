@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Product } from './product.entity';
 
+@Index('INDEX_SELLER_NAME', ['name'])
 @Entity({
   name: 'sellers',
 })
