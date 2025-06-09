@@ -89,7 +89,7 @@ export class ProductCategoriesRepository extends BaseRepository {
     const category = this.getRepository(Category)
       .createQueryBuilder('category')
       .leftJoinAndSelect('category.parentCategory', 'parentCategory')
-      .where('category.id IN (:...ids)', { ids: categoryIds });
+      .where('category.id IN (:...categoryIds)', { categoryIds: categoryIds });
 
     const categoryData = await category.getOne();
 
@@ -102,10 +102,10 @@ export class ProductCategoriesRepository extends BaseRepository {
       .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
-      .where('product.status != status', {
+      .where('category.id = :id', { id: id })
+      .andWhere('product.status != status', {
         status: STATUS.ProductStatus.DELETED,
       })
-      .andWhere('category.id = :id', { id: id })
       .cache(60000);
 
     if (productCategoryRequestDto.page) {

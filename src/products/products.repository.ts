@@ -70,7 +70,7 @@ export class ProductsRepository extends BaseRepository {
       .where('product.status != status', {
         status: STATUS.ProductStatus.DELETED,
       })
-      .where('product.slug LIKE :slug', { slug: `%${slug}` });
+      .andWhere('product.slug LIKE :slug', { slug: `%${slug}` });
 
     return await product.getMany();
   }
@@ -205,11 +205,9 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.seller', 'seller')
       .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
+      .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
       .leftJoinAndSelect('productOptionGroups.productOptions', 'productOptions')
-      .where('product.status != :status', {
-        status: STATUS.ProductStatus.DELETED,
-      })
       .cache(60000);
 
     if (productRequestDto.page) {
@@ -254,17 +252,21 @@ export class ProductsRepository extends BaseRepository {
     }
 
     if (productRequestDto.category) {
-      products.andWhere('productCategories.id IN (:...id)', {
-        id: productRequestDto.category,
+      products.andWhere('category.id IN(:...categoryIds)', {
+        categoryIds: productRequestDto.category,
       });
     }
 
     if (productRequestDto.brand) {
-      products.andWhere('brand.id = :id', { id: productRequestDto.brand });
+      products.andWhere('brand.id = :brandId', {
+        brandId: productRequestDto.brand,
+      });
     }
 
     if (productRequestDto.seller) {
-      products.andWhere('seller.id = :id', { id: productRequestDto.seller });
+      products.andWhere('seller.id = :sellerId', {
+        sellerId: productRequestDto.seller,
+      });
     }
 
     if (productRequestDto.search) {
