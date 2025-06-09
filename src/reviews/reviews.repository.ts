@@ -19,15 +19,17 @@ export class ReviewsRepository extends BaseRepository {
     id: string,
     updateProductReviewDto: UpdateProductReviewDto,
   ) {
-    const review = await this.getRepository(Review).findOneBy({
-      id: id,
+    const review = await this.getRepository(Review).findOne({
+      where: { id: id },
+      lock: { mode: 'pessimistic_write' },
     });
 
-    review.rating = updateProductReviewDto.rating;
-    review.title = updateProductReviewDto.title;
-    review.content = updateProductReviewDto.content;
+    const merge = this.getRepository(Review).merge(
+      review,
+      updateProductReviewDto,
+    );
 
-    return await this.getRepository(Review).save(review);
+    return await this.getRepository(Review).save(merge);
   }
 
   // 상품 리뷰 삭제

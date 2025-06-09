@@ -127,7 +127,8 @@ export class ProductsService {
       throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
 
-    if (productData?.slug === product.slug) {
+    const slug = await this.productsRepository.findOneUniqueSlug(product.slug);
+    if (slug) {
       throw new HttpException('Already Product Slug', HttpStatus.BAD_REQUEST);
     }
 

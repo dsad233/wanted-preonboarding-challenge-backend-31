@@ -562,7 +562,10 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 목록 수정
   async updateProduct(id: string, updateProductDto: UpdateProductDto) {
-    const product = await this.getRepository(Product).findOneBy({ id: id });
+    const product = await this.getRepository(Product).findOne({
+      where: { id: id },
+      lock: { mode: 'pessimistic_write' },
+    });
 
     const merge = this.getRepository(Product).merge(product, updateProductDto);
 
@@ -574,12 +577,17 @@ export class ProductsRepository extends BaseRepository {
     id: string,
     updateProductDetailDto: UpdateProductDetailDto,
   ) {
-    await this.getRepository(ProductDetail).update(
-      { productId: id },
-      {
-        ...updateProductDetailDto,
-      },
+    const productDetail = await this.getRepository(ProductDetail).findOne({
+      where: { productId: id },
+      lock: { mode: 'pessimistic_write' },
+    });
+
+    const merge = this.getRepository(ProductDetail).merge(
+      productDetail,
+      updateProductDetailDto,
     );
+
+    await this.getRepository(ProductDetail).save(merge);
   }
 
   // 상품 가격 정보 수정
@@ -587,12 +595,17 @@ export class ProductsRepository extends BaseRepository {
     id: string,
     updateProductPriceDto: UpdateProductPriceDto,
   ) {
-    await this.getRepository(ProductPrice).update(
-      { productId: id },
-      {
-        ...updateProductPriceDto,
-      },
+    const productPrice = await this.getRepository(ProductPrice).findOne({
+      where: { productId: id },
+      lock: { mode: 'pessimistic_write' },
+    });
+
+    const merge = this.getRepository(ProductPrice).merge(
+      productPrice,
+      updateProductPriceDto,
     );
+
+    await this.getRepository(ProductPrice).save(merge);
   }
 
   // 상품 카테고리 정보 수정
@@ -601,14 +614,16 @@ export class ProductsRepository extends BaseRepository {
     updateProductCategoryDto: UpdateProductCategoryDto[],
   ) {
     // 기존 카테고리 데이터 삭제
-    await this.getRepository(ProductCategory).delete({ productId: id });
+    await this.getRepository(ProductCategory).delete({
+      productId: id,
+    });
     for (const data of updateProductCategoryDto) {
       const category = this.getRepository(ProductCategory).create({
         productId: id,
         ...data,
       });
 
-      this.getRepository(ProductCategory).save(category);
+      await this.getRepository(ProductCategory).save(category);
     }
   }
 
@@ -698,14 +713,16 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 소프트 삭제
   async softDeleteProduct(id: string) {
-    await this.getRepository(Product).update(
-      {
-        id: id,
-      },
-      {
-        status: STATUS.ProductStatus.DELETED,
-      },
-    );
+    const product = await this.getRepository(Product).findOne({
+      where: { id: id },
+      lock: { mode: 'pessimistic_write' },
+    });
+
+    const merge = this.getRepository(Product).merge(product, {
+      status: STATUS.ProductStatus.DELETED,
+    });
+
+    await this.getRepository(Product).save(merge);
   }
 
   // 상품 상세 정보 삭제
