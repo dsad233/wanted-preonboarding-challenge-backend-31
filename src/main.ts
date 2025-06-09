@@ -9,7 +9,7 @@ declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bufferLogs: false,
+    bufferLogs: true,
     logger: winstonLogger,
   });
 
