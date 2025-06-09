@@ -567,9 +567,20 @@ export class ProductsRepository extends BaseRepository {
       lock: { mode: 'pessimistic_write' },
     });
 
-    const merge = this.getRepository(Product).merge(product, updateProductDto);
+    if (product) {
+      const merge = this.getRepository(Product).merge(
+        product,
+        updateProductDto,
+      );
 
-    return await this.getRepository(Product).save(merge);
+      return await this.getRepository(Product).save(merge);
+    } else {
+      const newProduct = this.getRepository(Product).create({
+        ...updateProductDto,
+      });
+
+      return await this.getRepository(Product).save(newProduct);
+    }
   }
 
   // 상품 상세 정보 수정
@@ -582,12 +593,20 @@ export class ProductsRepository extends BaseRepository {
       lock: { mode: 'pessimistic_write' },
     });
 
-    const merge = this.getRepository(ProductDetail).merge(
-      productDetail,
-      updateProductDetailDto,
-    );
+    if (productDetail) {
+      const merge = this.getRepository(ProductDetail).merge(
+        productDetail,
+        updateProductDetailDto,
+      );
 
-    await this.getRepository(ProductDetail).save(merge);
+      await this.getRepository(ProductDetail).save(merge);
+    } else {
+      const newProductDetail = this.getRepository(ProductDetail).create({
+        ...updateProductDetailDto,
+      });
+
+      await this.getRepository(ProductDetail).save(newProductDetail);
+    }
   }
 
   // 상품 가격 정보 수정
@@ -600,12 +619,20 @@ export class ProductsRepository extends BaseRepository {
       lock: { mode: 'pessimistic_write' },
     });
 
-    const merge = this.getRepository(ProductPrice).merge(
-      productPrice,
-      updateProductPriceDto,
-    );
+    if (productPrice) {
+      const merge = this.getRepository(ProductPrice).merge(
+        productPrice,
+        updateProductPriceDto,
+      );
 
-    await this.getRepository(ProductPrice).save(merge);
+      await this.getRepository(ProductPrice).save(merge);
+    } else {
+      const newProductPrice = this.getRepository(ProductPrice).create({
+        ...updateProductPriceDto,
+      });
+
+      await this.getRepository(ProductPrice).save(newProductPrice);
+    }
   }
 
   // 상품 카테고리 정보 수정
@@ -614,9 +641,8 @@ export class ProductsRepository extends BaseRepository {
     updateProductCategoryDto: UpdateProductCategoryDto[],
   ) {
     // 기존 카테고리 데이터 삭제
-    await this.getRepository(ProductCategory).delete({
-      productId: id,
-    });
+    await this.getRepository(ProductCategory).delete({ productId: id });
+
     for (const data of updateProductCategoryDto) {
       const category = this.getRepository(ProductCategory).create({
         productId: id,
@@ -633,29 +659,31 @@ export class ProductsRepository extends BaseRepository {
     updateProductOptionGroupDto: UpdateProductOptionGroupDto[],
   ) {
     // 기존 상품 옵션 그룹 조회
-    const products = await this.getRepository(ProductOptionGroup).find({
+    const productOptionGroups = await this.getRepository(
+      ProductOptionGroup,
+    ).find({
       where: { productId: id },
     });
 
-    if (products?.length) {
-      for (const data of products) {
+    if (productOptionGroups?.length) {
+      for (const group of productOptionGroups) {
         // 기존 상품 옵션 데이터 삭제
         await this.getRepository(ProductOption).delete({
-          optionGroupId: data.id,
+          optionGroupId: group.id,
         });
       }
-    }
 
-    // 기존 상품 옵션 그룹 삭제
-    await this.getRepository(ProductOptionGroup).delete({
-      productId: id,
-    });
+      // 기존 상품 옵션 그룹 삭제
+      await this.getRepository(ProductOptionGroup).delete({
+        productId: id,
+      });
+    }
 
     for (const data of updateProductOptionGroupDto) {
       const productOptionGroup = this.getRepository(ProductOptionGroup).create({
         productId: id,
-        name: data.name,
-        displayOrder: data.displayOrder,
+        name: data?.name,
+        displayOrder: data?.displayOrder,
       });
 
       await this.getRepository(ProductOptionGroup).save(productOptionGroup);
@@ -679,6 +707,7 @@ export class ProductsRepository extends BaseRepository {
   ) {
     // 기존 상품 이미지 삭제
     await this.getRepository(ProductImage).delete({ productId: id });
+
     for (const data of updateProductImageDto) {
       const image = this.getRepository(ProductImage).create({
         productId: id,
@@ -696,6 +725,7 @@ export class ProductsRepository extends BaseRepository {
   ) {
     // 기존 상품 태그 정보 삭제
     await this.getRepository(ProductTag).delete({ productId: id });
+
     for (const data of updateProductTagDto) {
       const tag = this.getRepository(ProductTag).create({
         productId: id,
@@ -706,23 +736,19 @@ export class ProductsRepository extends BaseRepository {
     }
   }
 
+  // 상품 소프트 삭제
+  async softDeleteProduct(id: string) {
+    await this.getRepository(Product).update(
+      { id: id },
+      {
+        status: STATUS.ProductStatus.DELETED,
+      },
+    );
+  }
+
   // 상품 목록 삭제
   async deleteProduct(id: string) {
     await this.getRepository(Product).delete(id);
-  }
-
-  // 상품 소프트 삭제
-  async softDeleteProduct(id: string) {
-    const product = await this.getRepository(Product).findOne({
-      where: { id: id },
-      lock: { mode: 'pessimistic_write' },
-    });
-
-    const merge = this.getRepository(Product).merge(product, {
-      status: STATUS.ProductStatus.DELETED,
-    });
-
-    await this.getRepository(Product).save(merge);
   }
 
   // 상품 상세 정보 삭제
@@ -752,9 +778,9 @@ export class ProductsRepository extends BaseRepository {
       await this.getRepository(ProductOption).delete({
         optionGroupId: data?.id,
       });
-    }
 
-    await this.getRepository(ProductOptionGroup).delete({ productId: id });
+      await this.getRepository(ProductOptionGroup).delete({ productId: id });
+    }
   }
 
   // 상품 이미지 정보 삭제

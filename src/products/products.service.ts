@@ -136,25 +136,28 @@ export class ProductsService {
     const update = await this.productsRepository.updateProduct(id, product);
 
     // 상품 상세 정보 수정
-    await this.productsRepository.updateProductDetail(id, productDetail);
+    await this.productsRepository.updateProductDetail(update.id, productDetail);
 
     // 상품 가격 정보 수정
-    await this.productsRepository.updateProductPrice(id, productPrice);
+    await this.productsRepository.updateProductPrice(update.id, productPrice);
 
     // 상품 카테고리 정보 수정
-    await this.productsRepository.updateProductCategory(id, productCategories);
+    await this.productsRepository.updateProductCategory(
+      update.id,
+      productCategories,
+    );
 
     // 상품 옵션 정보 수정
     await this.productsRepository.updateProductOptionGroup(
-      id,
+      update.id,
       productOptionGroups,
     );
 
     // 상품 이미지 정보 수정
-    await this.productsRepository.updateProductImage(id, productImages);
+    await this.productsRepository.updateProductImage(update.id, productImages);
 
     // 상품 태그 정보 수정
-    await this.productsRepository.updateProductTag(id, productTags);
+    await this.productsRepository.updateProductTag(update.id, productTags);
 
     return {
       success: true,
@@ -202,6 +205,11 @@ export class ProductsService {
 
   // 상품 소프트 삭제
   async softDelete(id: string): Promise<object> {
+    const product = this.productsRepository.findOneProductId(id);
+    if (!product) {
+      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+
     await this.productsRepository.softDeleteProduct(id);
 
     return {

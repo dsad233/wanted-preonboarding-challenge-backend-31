@@ -62,6 +62,7 @@ export class ProductsController {
   }
 
   // 상품 목록 삭제
+  @UseInterceptors(TransactionInterceptor)
   @Delete('/:id')
   async delete(@Param('id') id: string): Promise<object> {
     return await this.productsService.delete(id);

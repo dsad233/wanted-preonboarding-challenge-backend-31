@@ -1,6 +1,12 @@
 import { BaseRepository } from '@libs/database';
 import { ProductOption } from '@libs/database/entities';
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Scope,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreateProductOptionDto } from 'src/products/dto/createProductDto';
@@ -32,8 +38,11 @@ export class ProductOptionsRepository extends BaseRepository {
   ) {
     const option = await this.getRepository(ProductOption).findOne({
       where: { id: id },
-      lock: { mode: 'pessimistic_write' },
     });
+
+    if (!option) {
+      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
 
     const merge = this.getRepository(ProductOption).merge(
       option,

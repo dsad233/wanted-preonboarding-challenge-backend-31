@@ -1,6 +1,6 @@
 import { BaseRepository } from '@libs/database';
 import { Review } from '@libs/database/entities';
-import { Inject } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { UpdateProductReviewDto } from 'src/products/dto/updateProductDto';
@@ -19,10 +19,11 @@ export class ReviewsRepository extends BaseRepository {
     id: string,
     updateProductReviewDto: UpdateProductReviewDto,
   ) {
-    const review = await this.getRepository(Review).findOne({
-      where: { id: id },
-      lock: { mode: 'pessimistic_write' },
-    });
+    const review = await this.getRepository(Review).findOneBy({ id: id });
+
+    if (!review) {
+      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
 
     const merge = this.getRepository(Review).merge(
       review,
