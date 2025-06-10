@@ -36,8 +36,8 @@ export class ProductOptionsRepository extends BaseRepository {
     id: string,
     updateProductOption: UpdateProductOption,
   ) {
-    const option = await this.getRepository(ProductOption).findOne({
-      where: { id: id },
+    const option = await this.getRepository(ProductOption).findOneBy({
+      id: id,
     });
 
     if (!option) {
