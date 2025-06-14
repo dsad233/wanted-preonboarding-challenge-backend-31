@@ -29,7 +29,7 @@ export class AuthService {
       createUserDto.email,
     );
 
-    if (user?.email === createUserDto.email) {
+    if (user) {
       throw new HttpException('Already User Email', HttpStatus.BAD_REQUEST);
     }
 
