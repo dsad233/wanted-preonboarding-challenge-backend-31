@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: postgres-15
     ports:
-      - '5432:${DB_PORT}'
+      - ${DB_PORT}:5432
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -19,7 +19,7 @@ services:
     image: redis:7.4.3
     container_name: redis-7.4.3
     ports:
-      - 6379:${REDIS_PORT}
+      - ${REDIS_PORT}:6379
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ../../db/redis/data:/data
@@ -43,7 +43,7 @@ services:
     expose:
       - ${PORT}
     ports:
-      - 3002:${PORT}
+      - ${PORT}:3002
     env_file:
       - ../../.env.production
     restart: always

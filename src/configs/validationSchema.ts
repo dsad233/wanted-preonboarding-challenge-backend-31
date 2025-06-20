@@ -23,10 +23,4 @@ export const ValidationSchema = Joi.object({
   JWT_REFRESH_EXP: Joi.string().required(),
   JWT_ACCESS_REDIS_TTL: Joi.number().required(),
   JWT_REFRESH_REDIS_TTL: Joi.number().required(),
-  // Fluent 설정
-  FLUENTD_HOST: Joi.string().required(),
-  FLUENTD_PORT: Joi.number().required(),
-  FLUENTD_TAG: Joi.string().required(),
-  FLUENTD_TIMEOUT: Joi.number().required(),
-  FLUENTD_RECONNECTINTERVAL: Joi.number().required(),
 });

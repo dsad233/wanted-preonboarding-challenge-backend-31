@@ -1,7 +1,6 @@
 import { utilities, WinstonModule } from 'nest-winston';
 import * as winstonDaily from 'winston-daily-rotate-file';
 import * as winston from 'winston';
-import { FluentTransport } from './fluentTransport';
 
 // 참고: https://sjh9708.tistory.com/52
 
@@ -16,7 +15,7 @@ const appendTimestamp = winston.format((info, opts) => {
 const dailyOptions = {
   level: 'http', //http보다 높은 단계의 로그만 기록
   datePattern: 'YYYY-MM-DD', //날짜 포멧 지정
-  dirname: __dirname + '/logs', //저장할 URL
+  dirname: __dirname + '../../logs', //저장할 URL
   filename: `app.log.%DATE%`,
   maxFiles: 30, //30일의 로그 저장
   zippedArchive: true, // 로그가 쌓였을 때 압축
@@ -43,13 +42,6 @@ export const winstonLogger = WinstonModule.createLogger({
 
     // 파일 로깅 옵션 지정
     new winstonDaily(dailyOptions),
-    new FluentTransport({
-      host: process.env.FLUENTD_HOST,
-      port: Number(process.env.FLUENTD_PORT),
-      tag: process.env.FLUENTD_TAG,
-      timeout: Number(process.env.FLUENTD_TIMEOUT),
-      reconnectInterval: Number(process.env.FLUENTD_RECONNECTINTERVAL),
-    }),
   ],
   // 포멧 지정
   format: winston.format.combine(
