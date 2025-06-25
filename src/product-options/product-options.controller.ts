@@ -1,7 +1,16 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ProductOptionsService } from './product-options.service';
 import { CreateProductOptionDto } from 'src/products/dto/createProductDto';
 import { UpdateProductOption } from 'src/products/dto/updateProductDto';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 
 @Controller('product-options')
 export class ProductOptionsController {
@@ -16,6 +25,7 @@ export class ProductOptionsController {
   }
 
   // 상품 옵션 수정
+  @UseInterceptors(TransactionInterceptor)
   @Put('/:id')
   async update(
     @Param('id') id: string,

@@ -1,12 +1,21 @@
-import { Body, Controller, Delete, Param, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Put,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { UpdateProductReviewDto } from 'src/products/dto/updateProductDto';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   // 상품 리뷰 수정
+  @UseInterceptors(TransactionInterceptor)
   @Put('/:id')
   async update(
     @Param('id') id: string,

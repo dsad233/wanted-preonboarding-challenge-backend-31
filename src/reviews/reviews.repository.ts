@@ -1,11 +1,18 @@
 import { BaseRepository } from '@libs/database';
 import { Review } from '@libs/database/entities';
-import { HttpException, HttpStatus, Inject } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Scope,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { UpdateProductReviewDto } from 'src/products/dto/updateProductDto';
 import { DataSource } from 'typeorm';
 
+@Injectable({ scope: Scope.REQUEST })
 export class ReviewsRepository extends BaseRepository {
   constructor(
     @InjectDataSource('default') defaultDataSource: DataSource,
@@ -19,7 +26,10 @@ export class ReviewsRepository extends BaseRepository {
     id: string,
     updateProductReviewDto: UpdateProductReviewDto,
   ) {
-    const review = await this.getRepository(Review).findOneBy({ id: id });
+    const review = await this.getRepository(Review).findOne({
+      where: { id: id },
+      lock: { mode: 'pessimistic_write' },
+    });
 
     if (!review) {
       throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);

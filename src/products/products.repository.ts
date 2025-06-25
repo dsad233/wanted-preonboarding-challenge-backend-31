@@ -738,12 +738,20 @@ export class ProductsRepository extends BaseRepository {
 
   // 상품 소프트 삭제
   async softDeleteProduct(id: string) {
-    await this.getRepository(Product).update(
-      { id: id },
-      {
-        status: STATUS.ProductStatus.DELETED,
-      },
-    );
+    const product = await this.getRepository(Product).findOne({
+      where: { id: id },
+      lock: { mode: 'pessimistic_write' },
+    });
+
+    if (!product) {
+      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+
+    const merge = this.getRepository(Product).merge(product, {
+      status: STATUS.ProductStatus.DELETED,
+    });
+
+    await this.getRepository(Product).save(merge);
   }
 
   // 상품 목록 삭제

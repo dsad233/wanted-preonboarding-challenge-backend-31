@@ -1,13 +1,13 @@
 import { BaseRepository } from '@libs/database';
 import { Category, Product } from '@libs/database/entities';
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 import { STATUS } from '@libs/enums';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class ProductCategoriesRepository extends BaseRepository {
   constructor(
     @InjectDataSource('default') defaultDataSource: DataSource,

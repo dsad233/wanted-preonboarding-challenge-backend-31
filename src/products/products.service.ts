@@ -205,11 +205,6 @@ export class ProductsService {
 
   // 상품 소프트 삭제
   async softDelete(id: string): Promise<object> {
-    const product = this.productsRepository.findOneProductId(id);
-    if (!product) {
-      throw new HttpException('RESOURCE_NOT_FOUND', HttpStatus.NOT_FOUND);
-    }
-
     await this.productsRepository.softDeleteProduct(id);
 
     return {

@@ -69,6 +69,7 @@ export class ProductsController {
   }
 
   // 상품 소프트 삭제
+  @UseInterceptors(TransactionInterceptor)
   @Delete('/soft/:id')
   async softDelete(@Param('id') id: string): Promise<object> {
     return await this.productsService.softDelete(id);
