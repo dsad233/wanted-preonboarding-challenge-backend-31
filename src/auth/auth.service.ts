@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { CreateUserDto } from './dto/createUserDto';
-import { EmailRegExp } from 'src/common/utils';
+import { EmailRegExp } from '../common/utils';
 import { LoginUserDto } from './dto/loginUserDto';
-import { RedisRepository } from 'src/redis/redis.repository';
-import { JwtService } from 'src/jwt/jwt.service';
+import { RedisRepository } from '../redis/redis.repository';
+import { JwtService } from '../jwt/jwt.service';
 import { ConfigService } from '@nestjs/config';
 import { UserPayloadDto } from './dto/userPayloadDto';
 
@@ -101,19 +101,21 @@ export class AuthService {
       throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
     }
 
-    await this.jwtService.tokenVerify(
+    const verifyUser = await this.jwtService.tokenVerify(
       JSON.parse(getSession).refreshToken,
       this.configService.getOrThrow<string>('jwt.refreshSecret'),
     );
 
-    const userData = await this.authRepository.findOneUserEmail(user.email);
+    const userData = await this.authRepository.findOneUserEmail(
+      verifyUser.email,
+    );
     if (!userData) {
       throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
     }
 
     const payload = {
-      id: user.id,
-      email: user.email,
+      id: userData.id,
+      email: userData.email,
     };
 
     const token = await this.jwtService.jwtSign(
@@ -141,17 +143,17 @@ export class AuthService {
     };
 
     // 기존 세션 삭제
-    await this.redisRepository.del(`ACCESS:${user.id}:${user.email}`);
-    await this.redisRepository.del(`REFRESH:${user.id}:${user.email}`);
+    await this.redisRepository.del(`ACCESS:${userData.id}:${userData.email}`);
+    await this.redisRepository.del(`REFRESH:${userData.id}:${userData.email}`);
     // 새로운 세션 설정
     await this.redisRepository.setex(
-      `ACCESS:${user.id}:${user.email}`,
+      `ACCESS:${userData.id}:${userData.email}`,
       this.configService.getOrThrow<number>('jwt.tokenTtl'),
       JSON.stringify(accessTokenSession),
     );
 
     await this.redisRepository.setex(
-      `REFRESH:${user.id}:${user.email}`,
+      `REFRESH:${userData.id}:${userData.email}`,
       this.configService.getOrThrow<number>('jwt.refreshTokenTtl'),
       JSON.stringify(refreshTokenSession),
     );

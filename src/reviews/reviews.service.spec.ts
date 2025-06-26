@@ -1,18 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewsService } from './reviews.service';
+import { TestBed } from '@automock/jest';
 
 describe('ReviewsService', () => {
-  let service: ReviewsService;
+  let reviewsService: ReviewsService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ReviewsService],
-    }).compile();
+    const { unit, unitRef } = TestBed.create(ReviewsService).compile();
 
-    service = module.get<ReviewsService>(ReviewsService);
+    reviewsService = unit;
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(reviewsService).toBeDefined();
   });
 });

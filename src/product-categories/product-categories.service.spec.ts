@@ -1,18 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductCategoriesService } from './product-categories.service';
+import { TestBed } from '@automock/jest';
 
 describe('ProductCategoriesService', () => {
-  let service: ProductCategoriesService;
+  let productCategoriesService: ProductCategoriesService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ProductCategoriesService],
-    }).compile();
+    const { unit, unitRef } = TestBed.create(
+      ProductCategoriesService,
+    ).compile();
 
-    service = module.get<ProductCategoriesService>(ProductCategoriesService);
+    productCategoriesService = unit;
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(productCategoriesService).toBeDefined();
   });
 });
