@@ -31,7 +31,7 @@ describe('AuthService', () => {
     jest.useFakeTimers();
   });
 
-  describe('[유저 생성] createUser', () => {
+  describe('[유저 생성] createUser Method', () => {
     it('[유저 생성] createUser Success', async () => {
       const createUserDto: CreateUserDto = {
         name: 'test',
@@ -103,7 +103,7 @@ describe('AuthService', () => {
       }
     });
 
-    describe('[로그인] signIn', () => {
+    describe('[로그인] signIn Method', () => {
       it('[로그인] signIn Success', async () => {
         const loginDto: LoginUserDto = {
           name: 'test',
@@ -236,7 +236,7 @@ describe('AuthService', () => {
       });
     });
 
-    describe('[토큰 재발급] reissueToken', () => {
+    describe('[토큰 재발급] reissueToken Method', () => {
       it('[토큰 재발급] reissueToken Success', async () => {
         const session = {
           id: 'a7bdd689-2c30-4351-8a96-acdabc216d66',
@@ -434,7 +434,7 @@ describe('AuthService', () => {
       });
     });
 
-    describe('[로그아웃] signOut', () => {
+    describe('[로그아웃] signOut Method', () => {
       it('[로그아웃] signOut Success', async () => {
         const payloadDto: UserPayloadDto = {
           id: 'a7bdd689-2c30-4351-8a96-acdabc216d66',
