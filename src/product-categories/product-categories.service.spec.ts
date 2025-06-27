@@ -1,7 +1,6 @@
 import { ProductCategoriesService } from './product-categories.service';
 import { TestBed } from '@automock/jest';
 import { ProductCategoriesRepository } from './product-categories.repository';
-import { Category } from '@libs/database/entities';
 import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 
 describe('ProductCategoriesService', () => {
@@ -24,33 +23,41 @@ describe('ProductCategoriesService', () => {
   describe('[카테고리 목록 조회] find Method', () => {
     it('[카테고리 목록 조회] find Success', async () => {
       const level = 1;
-      const category: Category = {
-        id: '99101754-77ba-470c-b2ca-c79408008143',
-        name: 'test1',
-        slug: 'test-slug',
-        description: 'test',
-        parentId: null,
-        level: 1,
-        imageUrl: 'http://test.com',
-        childCategories: [],
-        parentCategory: {
-          id: '2ec1758a-7074-47c3-8d74-fc6af4cc12e6',
-          name: 'test12',
-          slug: 'test-slug-2',
+      const categories = [
+        {
+          id: '99101754-77ba-470c-b2ca-c79408008143',
+          name: 'test1',
+          slug: 'test-slug',
           description: 'test',
+          level: 1,
+          parentId: null,
+          imageUrl: 'http://test.com',
+          children: [
+            {
+              id: '7688aff6-e1e9-4ac4-aaff-cb400e1d077d',
+              name: 'test-11',
+              slug: 'test-slug-1',
+              description: 'test11',
+              parentId: '99101754-77ba-470c-b2ca-c79408008143',
+              level: 2,
+              imageUrl: 'http://test11.com',
+            },
+          ],
+        },
+        {
+          id: '3e265676-7524-4d84-a87f-7ef484e49cf7',
+          name: 'test2',
+          slug: 'test-slug2',
+          description: 'test2',
           parentId: null,
           level: 1,
           imageUrl: 'http://test2.com',
-          childCategories: [],
-          parentCategory: null,
-          productCategories: [],
         },
-        productCategories: [],
-      };
+      ];
 
       jest
         .spyOn(productCategoriesRepository, 'find')
-        .mockResolvedValue([category]);
+        .mockResolvedValue(categories);
 
       const find = await productCategoriesService.find(level);
 
@@ -59,7 +66,7 @@ describe('ProductCategoriesService', () => {
 
       expect(find).toEqual({
         success: true,
-        data: [category],
+        data: categories,
         message: '카테고리 목록을 성공적으로 조회했습니다.',
       });
     });
