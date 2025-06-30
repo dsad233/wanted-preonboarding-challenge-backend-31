@@ -128,7 +128,7 @@ export class ProductsRepository extends BaseRepository {
         ...newProductCategory,
       });
 
-      return await this.getRepository(ProductCategory).save(productCategory);
+      await this.getRepository(ProductCategory).save(productCategory);
     }
   }
 
