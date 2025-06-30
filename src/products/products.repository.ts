@@ -296,7 +296,7 @@ export class ProductsRepository extends BaseRepository {
         id: data.id,
         name: data.name,
         slug: data.slug,
-        shortDescription: data.shortDescription,
+        short_description: data.shortDescription,
         base_price: data.productPrices[0]?.basePrice,
         sale_price: data.productPrices[0]?.salePrice,
         currency: data.productPrices[0]?.currency,
