@@ -101,6 +101,11 @@ describe('AuthService', () => {
         expect((err as HttpException).getStatus()).toBe(HttpStatus.BAD_REQUEST);
         expect((err as HttpException).getResponse()).toBe('Already User Email');
       }
+
+      expect(authRepository.findOneUserEmail).toHaveBeenCalledWith(
+        createUserDto.email,
+      );
+      expect(authRepository.findOneUserEmail).toHaveBeenCalledTimes(1);
     });
 
     describe('[로그인] signIn Method', () => {
@@ -233,6 +238,11 @@ describe('AuthService', () => {
           );
           expect((err as HttpException).getResponse()).toBe('Not Found User');
         }
+
+        expect(authRepository.findOneUserEmail).toHaveBeenCalledWith(
+          loginDto.email,
+        );
+        expect(authRepository.findOneUserEmail).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -409,6 +419,11 @@ describe('AuthService', () => {
           );
           expect((err as HttpException).getResponse()).toBe('Not Found User');
         }
+
+        expect(redisRepository.get).toHaveBeenCalledWith(
+          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+        );
+        expect(redisRepository.get).toHaveBeenCalledTimes(1);
       });
 
       it('[토큰 재발급] reissueToken DB User Not Found Error', async () => {
@@ -431,6 +446,11 @@ describe('AuthService', () => {
           );
           expect((err as HttpException).getResponse()).toBe('Not Found User');
         }
+
+        expect(redisRepository.get).toHaveBeenCalledWith(
+          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+        );
+        expect(redisRepository.get).toHaveBeenCalledTimes(1);
       });
     });
 

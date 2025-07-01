@@ -75,7 +75,7 @@ export class ProductsController {
     return await this.productsService.softDelete(id);
   }
 
-  /*
+  /**
    * 상품 이미지
    */
 
@@ -88,7 +88,7 @@ export class ProductsController {
     return await this.productsService.createImage(id, createProductImageDto);
   }
 
-  /*
+  /**
    * 상품 리뷰
    */
 

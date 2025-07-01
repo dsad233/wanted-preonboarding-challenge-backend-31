@@ -213,7 +213,7 @@ export class ProductsService {
     };
   }
 
-  /*
+  /**
    * 상품 이미지
    */
 
@@ -230,7 +230,7 @@ export class ProductsService {
     };
   }
 
-  /*
+  /**
    * 상품 리뷰
    */
 

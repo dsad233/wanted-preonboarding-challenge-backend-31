@@ -3,6 +3,7 @@ import {
   CreateProductCategoryDto,
   CreateProductDetailDto,
   CreateProductDto,
+  CreateProductImageDto,
   CreateProductOptionDto,
   CreateProductOptionGroupDto,
   CreateProductPriceDto,
@@ -37,7 +38,7 @@ export class UpdateProductOptionGroupDto extends PartialType(
 export class UpdateProductOption extends PartialType(CreateProductOptionDto) {}
 
 // 상품 이미지 정보 수정 DTO
-export class UpdateProductImageDto extends PartialType(CreateProductPriceDto) {}
+export class UpdateProductImageDto extends PartialType(CreateProductImageDto) {}
 
 // 상품 태그 정보 수정 DTO
 export class UpdateProductTagDto extends PartialType(CreateProductTagDto) {}
@@ -73,7 +74,7 @@ export class UpdateProductPackageDto {
   productTags: UpdateProductTagDto[];
 }
 
-/*
+/**
  * 상품 리뷰
  */
 

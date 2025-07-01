@@ -806,7 +806,7 @@ export class ProductsRepository extends BaseRepository {
     await this.getRepository(Review).delete({ productId: id });
   }
 
-  /*
+  /**
    * 상품 리뷰
    */
 

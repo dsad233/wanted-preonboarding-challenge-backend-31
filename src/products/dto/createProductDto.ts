@@ -196,7 +196,7 @@ export class CreateProductPackageDto {
   productTags: CreateProductTagDto[];
 }
 
-/*
+/**
  * 상품 리뷰
  */
 
