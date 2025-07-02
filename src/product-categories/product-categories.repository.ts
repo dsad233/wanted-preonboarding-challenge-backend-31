@@ -95,7 +95,7 @@ export class ProductCategoriesRepository extends BaseRepository {
 
     const products = this.getRepository(Product)
       .createQueryBuilder('product')
-      .innerJoinAndSelect('product.productPrices', 'productPrices')
+      .innerJoinAndSelect('product.productPrice', 'productPrice')
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.seller', 'seller')
@@ -103,7 +103,7 @@ export class ProductCategoriesRepository extends BaseRepository {
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .where('category.id = :id', { id: id })
-      .andWhere('product.status != status', {
+      .andWhere('product.status != :status', {
         status: STATUS.ProductStatus.DELETED,
       })
       .cache(60000);
@@ -141,9 +141,9 @@ export class ProductCategoriesRepository extends BaseRepository {
         name: product?.name,
         slug: product?.slug,
         short_description: product?.shortDescription,
-        base_price: product?.productPrices[0]?.basePrice,
-        sale_price: product?.productPrices[0]?.salePrice,
-        currency: product?.productPrices[0]?.currency,
+        base_price: product?.productPrice?.basePrice,
+        sale_price: product?.productPrice?.salePrice,
+        currency: product?.productPrice?.currency,
         primary_image: {
           url: product?.productImages[0]?.url,
           alt_text: product?.productImages[0]?.altText,

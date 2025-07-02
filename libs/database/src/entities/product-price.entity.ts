@@ -3,7 +3,7 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
@@ -67,7 +67,7 @@ export class ProductPrice {
   })
   taxRate: number;
 
-  @ManyToOne(() => Product, (product) => product.productPrices, {
+  @OneToOne(() => Product, (product) => product.productPrice, {
     createForeignKeyConstraints: false,
     cascade: true,
   })

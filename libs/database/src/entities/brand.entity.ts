@@ -2,7 +2,7 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
@@ -52,6 +52,6 @@ export class Brand {
   })
   website: string;
 
-  @OneToMany(() => Product, (product) => product.brand)
-  products: Product[];
+  @OneToOne(() => Product, (product) => product.brand)
+  product: Product;
 }

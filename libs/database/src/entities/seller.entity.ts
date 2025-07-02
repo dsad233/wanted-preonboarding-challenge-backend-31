@@ -1,4 +1,4 @@
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Product } from './product.entity';
 
@@ -51,6 +51,6 @@ export class Seller extends BaseEntity {
   })
   contactPhone: string;
 
-  @OneToMany(() => Product, (product) => product.seller)
-  products: Product[];
+  @OneToOne(() => Product, (product) => product.seller)
+  product: Product;
 }

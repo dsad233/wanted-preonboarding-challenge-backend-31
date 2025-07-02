@@ -3,8 +3,8 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import { BaseEntity } from './base.entity';
@@ -90,27 +90,27 @@ export class Product extends BaseEntity {
   })
   status: STATUS.ProductStatus;
 
-  @ManyToOne(() => Brand, (brand) => brand.products, {
+  @OneToOne(() => Brand, (brand) => brand.product, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'brand_id', referencedColumnName: 'id' })
   brand: Brand;
 
-  @ManyToOne(() => Seller, (seller) => seller.products, {
+  @OneToOne(() => Seller, (seller) => seller.product, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'seller_id', referencedColumnName: 'id' })
   seller: Seller;
 
-  @OneToMany(() => ProductDetail, (productDetail) => productDetail.product, {
+  @OneToOne(() => ProductDetail, (productDetail) => productDetail.product, {
     onDelete: 'CASCADE',
   })
-  productDetails: ProductDetail[];
+  productDetail: ProductDetail;
 
-  @OneToMany(() => ProductPrice, (productPrice) => productPrice.product, {
+  @OneToOne(() => ProductPrice, (productPrice) => productPrice.product, {
     onDelete: 'CASCADE',
   })
-  productPrices: ProductPrice[];
+  productPrice: ProductPrice;
 
   @OneToMany(
     () => ProductCategory,

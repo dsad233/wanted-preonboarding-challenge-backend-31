@@ -65,9 +65,9 @@ export class ProductsRepository extends BaseRepository {
   async findSlug(slug: string) {
     const product = this.getRepository(Product)
       .createQueryBuilder('product')
+      .innerJoinAndSelect('product.productPrice', 'productPrice')
       .leftJoinAndSelect('product.productImages', 'productImages')
-      .leftJoinAndSelect('product.productPrices', 'productPrices')
-      .where('product.status != status', {
+      .where('product.status != :status', {
         status: STATUS.ProductStatus.DELETED,
       })
       .andWhere('product.slug LIKE :slug', { slug: `%${slug}` });
@@ -199,7 +199,7 @@ export class ProductsRepository extends BaseRepository {
   async find(productRequestDto: ProductRequestDto) {
     const products = this.getRepository(Product)
       .createQueryBuilder('product')
-      .innerJoinAndSelect('product.productPrices', 'productPrices')
+      .innerJoinAndSelect('product.productPrice', 'productPrice')
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.seller', 'seller')
@@ -235,7 +235,7 @@ export class ProductsRepository extends BaseRepository {
 
     if (productRequestDto.minPrice) {
       products.andWhere(
-        `(productPrices.basePrice - COALESCE(productPrices.salePrice, ${0})) >= :minPrice`,
+        `(productPrice.basePrice - COALESCE(productPrice.salePrice, ${0})) >= :minPrice`,
         {
           minPrice: productRequestDto.minPrice,
         },
@@ -244,7 +244,7 @@ export class ProductsRepository extends BaseRepository {
 
     if (productRequestDto.maxPrice) {
       products.andWhere(
-        `(productPrices.basePrice - COALESCE(productPrices.salePrice, ${0})) <= :maxPrice`,
+        `(productPrice.basePrice - COALESCE(productPrice.salePrice, ${0})) <= :maxPrice`,
         {
           maxPrice: productRequestDto.maxPrice,
         },
@@ -297,9 +297,9 @@ export class ProductsRepository extends BaseRepository {
         name: data.name,
         slug: data.slug,
         short_description: data.shortDescription,
-        base_price: data.productPrices[0]?.basePrice,
-        sale_price: data.productPrices[0]?.salePrice,
-        currency: data.productPrices[0]?.currency,
+        base_price: data.productPrice?.basePrice,
+        sale_price: data.productPrice?.salePrice,
+        currency: data.productPrice?.currency,
         primary_image: productImageArray,
         brand: {
           id: data.brand?.id,
@@ -335,8 +335,8 @@ export class ProductsRepository extends BaseRepository {
       })
       .innerJoinAndSelect('product.seller', 'seller')
       .innerJoinAndSelect('product.brand', 'brand')
-      .innerJoinAndSelect('product.productDetails', 'productDetails')
-      .innerJoinAndSelect('product.productPrices', 'productPrices')
+      .innerJoinAndSelect('product.productDetail', 'productDetail')
+      .innerJoinAndSelect('product.productPrice', 'productPrice')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('category.parentCategory', 'parentCategory')
@@ -466,9 +466,9 @@ export class ProductsRepository extends BaseRepository {
             slug: recommendProduct?.slug,
             short_description: recommendProduct?.shortDescription,
             primary_image: [],
-            base_price: null,
-            sale_price: null,
-            currency: null,
+            base_price: recommendProduct.productPrice?.basePrice,
+            sale_price: recommendProduct.productPrice?.salePrice,
+            currency: recommendProduct.productPrice?.currency,
           };
 
           // 추천 상품에 대한 이미지 데이터 가공 처리
@@ -479,13 +479,6 @@ export class ProductsRepository extends BaseRepository {
                 alt_text: image?.altText,
               });
             }
-          }
-
-          // 추천 상품에 대한 가격 데이터 가공 처리
-          for (const price of recommendProduct.productPrices) {
-            slugData.base_price = price.basePrice;
-            slugData.sale_price = price.salePrice;
-            slugData.currency = price.currency;
           }
 
           recommendSlugArray.push(slugData);
@@ -519,24 +512,23 @@ export class ProductsRepository extends BaseRepository {
       created_at: result.createdAt,
       updated_at: result.updatedAt,
       detail: {
-        weight: result.productDetails[0]?.weight,
-        dimensions: result.productDetails[0]?.dimensions,
-        materials: result.productDetails[0]?.materials,
-        country_of_origin: result.productDetails[0]?.countryOfOrigin,
-        warranty_info: result.productDetails[0]?.warrantyInfo,
-        care_instructions: result.productDetails[0]?.careInstructions,
-        additional_info: result.productDetails[0]?.additionalInfo,
+        weight: result.productDetail?.weight,
+        dimensions: result.productDetail?.dimensions,
+        materials: result.productDetail?.materials,
+        country_of_origin: result.productDetail?.countryOfOrigin,
+        warranty_info: result.productDetail?.warrantyInfo,
+        care_instructions: result.productDetail?.careInstructions,
+        additional_info: result.productDetail?.additionalInfo,
       },
       price: {
-        base_price: result.productPrices[0]?.basePrice,
-        sale_price: result.productPrices[0]?.salePrice,
-        currency: result.productPrices[0]?.currency,
-        tax_rate: result.productPrices[0]?.taxRate,
+        base_price: result.productPrice?.basePrice,
+        sale_price: result.productPrice?.salePrice,
+        currency: result.productPrice?.currency,
+        tax_rate: result.productPrice?.taxRate,
         // 할인율
         discount_percentage: Math.floor(
-          ((result.productPrices[0]?.basePrice -
-            result.productPrices[0]?.salePrice) /
-            result.productPrices[0]?.basePrice) *
+          ((result.productPrice?.basePrice - result.productPrice?.salePrice) /
+            result.productPrice?.basePrice) *
             100,
         ),
       },
