@@ -43,10 +43,10 @@ export class JwtService {
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         throw new HttpException('TokenExpiredError', HttpStatus.UNAUTHORIZED);
-      } else if (err instanceof JsonWebTokenError) {
-        throw new HttpException('JsonWebTokenError', HttpStatus.UNAUTHORIZED);
       } else if (err instanceof NotBeforeError) {
         throw new HttpException('NotBeforeError', HttpStatus.UNAUTHORIZED);
+      } else if (err instanceof JsonWebTokenError) {
+        throw new HttpException('JsonWebTokenError', HttpStatus.UNAUTHORIZED);
       } else {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
