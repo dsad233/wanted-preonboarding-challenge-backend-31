@@ -1,0 +1,38 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-15
+    ports:
+      - '${DB_PORT}:5432'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: ${TZ}
+    volumes:
+      - ./db/postgres-data:/var/lib/postgresql/data
+      - ./db/postgres-data/logs:/var/log/postgresql
+    platform: linux/x86_64
+    restart: always
+    networks:
+      - server
+  redis:
+    image: redis:7.4.3
+    container_name: redis-7.4.3
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - ./db/redis/data:/var/lib/redis
+      - ./db/redis/conf/redis.conf:/etc/redis/redis.conf
+      - ./db/redis/logs:/var/log/redis
+    labels:
+      - 'name=redis'
+      - 'mode=standalone'
+    restart: always
+    networks:
+      - server
+networks:
+  server:
+    driver: bridge
+    external: true
