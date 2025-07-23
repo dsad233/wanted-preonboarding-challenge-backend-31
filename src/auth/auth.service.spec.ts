@@ -9,6 +9,7 @@ import { User } from '@libs/database/entities';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UserPayloadDto } from './dto/userPayloadDto';
 import { LoginUserDto } from './dto/loginUserDto';
+import { TYPE } from '@libs/enums';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -202,12 +203,12 @@ describe('AuthService', () => {
           'jwt.refreshTokenTtl',
         );
         expect(redisRepository.setex).toHaveBeenCalledWith(
-          `ACCESS:${user.id}:${user.email}`,
+          `${TYPE.TokenType.ACCESS}:${user.id}:${user.email}`,
           accessTokenTtl,
           JSON.stringify(accessTokenSession),
         );
         expect(redisRepository.setex).toHaveBeenCalledWith(
-          `REFRESH:${user.id}:${user.email}`,
+          `${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
           refreshTokenTtl,
           JSON.stringify(refreshTokenSession),
         );
@@ -337,7 +338,7 @@ describe('AuthService', () => {
         const reissue = await authService.reissueToken(payloadDto);
 
         expect(redisRepository.get).toHaveBeenCalledWith(
-          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+          `${TYPE.TokenType.REFRESH}:${payloadDto.id}:${payloadDto.email}`,
         );
         expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
@@ -372,10 +373,10 @@ describe('AuthService', () => {
         expect(jwtService.jwtRefreshSign).toHaveBeenCalledTimes(1);
 
         expect(redisRepository.del).toHaveBeenCalledWith(
-          `ACCESS:${user.id}:${user.email}`,
+          `${TYPE.TokenType.ACCESS}:${user.id}:${user.email}`,
         );
         expect(redisRepository.del).toHaveBeenCalledWith(
-          `REFRESH:${user.id}:${user.email}`,
+          `${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
         );
         expect(redisRepository.del).toHaveBeenCalledTimes(2);
 
@@ -384,12 +385,12 @@ describe('AuthService', () => {
           'jwt.refreshTokenTtl',
         );
         expect(redisRepository.setex).toHaveBeenCalledWith(
-          `ACCESS:${user.id}:${user.email}`,
+          `${TYPE.TokenType.ACCESS}:${user.id}:${user.email}`,
           accessTokenTtl,
           JSON.stringify(accessTokenSession),
         );
         expect(redisRepository.setex).toHaveBeenCalledWith(
-          `REFRESH:${user.id}:${user.email}`,
+          `${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
           refreshTokenTtl,
           JSON.stringify(refreshTokenSession),
         );
@@ -421,7 +422,7 @@ describe('AuthService', () => {
         }
 
         expect(redisRepository.get).toHaveBeenCalledWith(
-          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+          `${TYPE.TokenType.REFRESH}:${payloadDto.id}:${payloadDto.email}`,
         );
         expect(redisRepository.get).toHaveBeenCalledTimes(1);
       });
@@ -448,7 +449,7 @@ describe('AuthService', () => {
         }
 
         expect(redisRepository.get).toHaveBeenCalledWith(
-          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+          `${TYPE.TokenType.REFRESH}:${payloadDto.id}:${payloadDto.email}`,
         );
         expect(redisRepository.get).toHaveBeenCalledTimes(1);
       });
@@ -469,10 +470,10 @@ describe('AuthService', () => {
         const signOut = await authService.signOut(payloadDto);
 
         expect(redisRepository.del).toHaveBeenCalledWith(
-          `ACCESS:${payloadDto.id}:${payloadDto.email}`,
+          `${TYPE.TokenType.ACCESS}:${payloadDto.id}:${payloadDto.email}`,
         );
         expect(redisRepository.del).toHaveBeenCalledWith(
-          `REFRESH:${payloadDto.id}:${payloadDto.email}`,
+          `${TYPE.TokenType.REFRESH}:${payloadDto.id}:${payloadDto.email}`,
         );
         expect(redisRepository.del).toHaveBeenCalledTimes(2);
 
