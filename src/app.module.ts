@@ -10,12 +10,13 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule } from './jwt/jwt.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './auth/guard/auth.guard';
+import { AuthGuard } from './common/guards/auth.guard';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ProductsModule } from './products/products.module';
 import { ProductOptionsModule } from './product-options/product-options.module';
 import { ProductCategoriesModule } from './product-categories/product-categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { ThrottlerBehindProxyGuard } from './common/guards/throttler-behind-proxy.guard';
 
 @Module({
   imports: [
@@ -50,6 +51,10 @@ import { ReviewsModule } from './reviews/reviews.module';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerBehindProxyGuard,
     },
   ],
 })

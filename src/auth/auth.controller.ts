@@ -7,12 +7,14 @@ import { UserPayloadDto } from './dto/userPayloadDto';
 import { plainToClass } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 import { Public } from 'src/common/decorators/ispublic.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // 유저 생성
+  @Throttle({ default: { limit: 10, ttl: 10000 } })
   @Public()
   @Post()
   async create(@Body() createUserDto: CreateUserDto): Promise<object> {
@@ -20,6 +22,7 @@ export class AuthController {
   }
 
   // 로그인
+  @Throttle({ default: { limit: 5, ttl: 1000 } })
   @Public()
   @Post('/signin')
   async signIn(@Body() loginUserDto: LoginUserDto): Promise<object> {
