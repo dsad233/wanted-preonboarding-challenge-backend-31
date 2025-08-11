@@ -1,120 +1,36 @@
 name: deploy
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-env:
-  ECS_CONTAINER_TASK_NAME: ${{ secrets.AWS_ECS_CONTAINER_TASK_NAME }}
-
-permissions:
-  contents: read
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        description: 'AWS_ACCESS_KEY_ID'
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+        description: 'AWS_SECRET_ACCESS_KEY'
+      AWS_REGION:
+        required: true
+        description: 'AWS_REGION'
+      AWS_ECR_REPOSITORY:
+        required: true
+        description: 'AWS_ECR_REPOSITORY'
+      AWS_ECS_CONTAINER_TASK_NAME:
+        required: true
+        description: 'AWS_ECS_CONTAINER_TASK_NAME'
+      AWS_ECS_CONTAINER_NAME:
+        required: true
+        description: 'AWS_ECS_CONTAINER_NAME'
+      AWS_ECS_CONTAINER_SERVICE:
+        required: true
+        description: 'AWS_ECS_CONTAINER_SERVICE'
+      AWS_ECS_CONTAINER_CLUSTER:
+        required: true
+        description: 'AWS_ECS_CONTAINER_CLUSTER'
 
 jobs:
-  lint:
-    name: lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: ['18.x', '20.x', '22.x']
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Get npm cache directory
-        id: npm-cache
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            cache-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            cache-npm-
-      - name: Install dependencies
-        run: npm ci
-      - name: Run lint
-        run: npm run lint
-
-  test:
-    name: test
-    needs: lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: ['18.x', '20.x', '22.x']
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Get npm cache directory
-        id: npm-cache
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            cache-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            cache-npm-
-      - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm test
-
-  build:
-    name: build
-    needs: lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: ['18.x', '20.x', '22.x']
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Get npm cache directory
-        id: npm-cache
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            cache-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            cache-npm-
-      - name: Install dependencies
-        run: npm ci
-      - name: Run build
-        run: npm run build --if-present
-
   deploy:
     name: deploy
-    needs: ['lint', 'test', 'build']
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -140,7 +56,7 @@ jobs:
       - name: Retrieve most recent ECS task definition JSON file
         id: retrieve-task-def
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.ECS_CONTAINER_TASK_NAME }} --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ secrets.AWS_ECS_CONTAINER_TASK_NAME }} --query taskDefinition > task-definition.json
           cat task-definition.json
           echo "task-def-file=task-definition.json" >> $GITHUB_OUTPUT
       - name: Fill in the new image ID in the Amazon ECS task definition
