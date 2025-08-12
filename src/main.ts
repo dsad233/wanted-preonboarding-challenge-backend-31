@@ -23,6 +23,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  // shutdown hooks에 대한 리스닝 -> Lifecycle 이벤트 사용시 설정 필요
+  app.enableShutdownHooks();
+
   await app.listen(configService.get<number>('port') ?? 3000);
   console.log(
     `현재 애플리케이션 실행 환경: ${configService.get<number>('nodeEnv')}, ${configService.get<number>('port')}`,
