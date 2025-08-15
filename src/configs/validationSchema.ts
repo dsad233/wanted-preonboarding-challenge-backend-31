@@ -4,6 +4,7 @@ export const ValidationSchema = Joi.object({
   NODE_ENV: Joi.string()
     .valid('production', 'development', 'local', 'test', 'provision')
     .default('local'),
+  POOL_SIZE: Joi.number().required(),
   TZ: Joi.string().required(),
   PORT: Joi.number().port().default(3000),
   // 디비 설정

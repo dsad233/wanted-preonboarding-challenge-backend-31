@@ -9,6 +9,7 @@ export default () => ({
     port: Number(process.env.DB_PORT),
     name: process.env.DB_NAME,
     pass: process.env.DB_PASS,
+    poolSize: process.env.POOL_SIZE,
   },
   // Redis 설정
   redis: {
