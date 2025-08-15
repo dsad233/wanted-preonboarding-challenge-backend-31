@@ -203,7 +203,7 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.seller', 'seller')
-      .leftJoinAndSelect('product.reviews', 'reviews')
+      // .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
@@ -270,8 +270,8 @@ export class ProductsRepository extends BaseRepository {
     }
 
     if (productRequestDto.search) {
-      products.andWhere('product.name = :name', {
-        name: productRequestDto.search,
+      products.andWhere('product.name LIKE :name', {
+        name: `%${productRequestDto.search}%`,
       });
     }
 
