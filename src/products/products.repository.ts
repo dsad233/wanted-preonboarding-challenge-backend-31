@@ -203,7 +203,7 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.seller', 'seller')
-      // .leftJoinAndSelect('product.reviews', 'reviews')
+      .leftJoinAndSelect('product.reviews', 'reviews')
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
