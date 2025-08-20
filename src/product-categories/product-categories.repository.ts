@@ -20,7 +20,8 @@ export class ProductCategoriesRepository extends BaseRepository {
   async find(level: number) {
     const category = this.getRepository(Category)
       .createQueryBuilder('category')
-      .orderBy('category.level', 'ASC');
+      .orderBy('category.level', 'ASC')
+      .cache('product_category_find', 120000);
 
     if (level) {
       category.andWhere('category.level = :level', { level: level });
@@ -106,7 +107,7 @@ export class ProductCategoriesRepository extends BaseRepository {
       .andWhere('product.status != :status', {
         status: STATUS.ProductStatus.DELETED,
       })
-      .cache(60000);
+      .cache('product_category_findOne', 300000);
 
     if (productCategoryRequestDto.page) {
       products.skip(productCategoryRequestDto.getSkip());

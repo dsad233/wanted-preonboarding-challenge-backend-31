@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: postgres-15
     ports:
-      - '${DB_PORT}:5432'
+      - ${DB_PORT}:5432
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -16,20 +16,53 @@ services:
     restart: always
     networks:
       - server
-  redis:
+  redis-cluster:
     image: redis:7.4.3
-    container_name: redis-7.4.3
-    ports:
-      - ${REDIS_PORT}:6379
-    command: redis-server /etc/redis/redis.conf
+    container_name: redis-master
     volumes:
-      - ./db/redis/data:/var/lib/redis
-      - ./db/redis/conf/redis.conf:/etc/redis/redis.conf
-      - ./db/redis/logs:/var/log/redis
-    labels:
-      - 'name=redis'
-      - 'mode=standalone'
-    restart: always
+      - ./db/redis/master/data:/var/lib/redis/master
+      - ./db/redis/master/conf/redis.conf:/etc/redis/master/redis.conf
+      - ./db/redis/master/logs:/var/log/redis/master
+    command: redis-server /etc/redis/master/redis.conf
+    ports:
+      - ${REDIS_MASTER_PORT}:6379
+      - 16379:16379
+    networks:
+      - server
+  redis-node-1:
+    image: redis:7.4.3
+    container_name: redis-slave1
+    volumes:
+      - ./db/redis/slave1/data:/var/lib/redis/slave1
+      - ./db/redis/slave1/conf/redis.conf:/etc/redis/slave1/redis.conf
+      - ./db/redis/slave1/logs:/var/log/redis/slave1
+    command: redis-server /etc/redis/slave1/redis.conf
+    ports:
+      - ${REDIS_SLAVE1_PORT}:6380
+      - 16380:16380
+    networks:
+      - server
+  redis-node-2:
+    image: redis:7.4.3
+    container_name: redis-slave2
+    volumes:
+      - ./db/redis/slave2/data:/var/lib/redis/slave2
+      - ./db/redis/slave2/conf/redis.conf:/etc/redis/slave2/redis.conf
+      - ./db/redis/slave2/logs:/var/log/redis/slave2
+    command: redis-server /etc/redis/slave2/redis.conf
+    ports:
+      - ${REDIS_SLAVE2_PORT} :6381
+      - 16381:16381
+    networks:
+      - server
+  redis-cluster-entry:
+    image: redis:7.4.3
+    container_name: redis-cluster-entry
+    command: redis-cli -a ${REDIS_PASS} --cluster create redis-cluster:${REDIS_MASTER_PORT} redis-node-1:${REDIS_SLAVE1_PORT} redis-node-2:${REDIS_SLAVE2_PORT} --cluster-yes
+    depends_on:
+      - redis-cluster
+      - redis-node-1
+      - redis-node-2
     networks:
       - server
 networks:
