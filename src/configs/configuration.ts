@@ -14,8 +14,13 @@ export default () => ({
   // Redis 설정
   redis: {
     host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    db: Number(process.env.REDIS_DB),
+    masterHost: process.env.REDIS_MASTER_HOST,
+    slave1Host: process.env.REDIS_SLAVE1_HOST,
+    slave2Host: process.env.REDIS_SLAVE2_HOST,
+    pass: process.env.REDIS_PASS,
+    masterPort: Number(process.env.REDIS_MASTER_PORT),
+    slave1Port: Number(process.env.REDIS_SLAVE1_PORT),
+    slave2Port: Number(process.env.REDIS_SLAVE2_PORT),
   },
   // Jwt 설정
   jwt: {
