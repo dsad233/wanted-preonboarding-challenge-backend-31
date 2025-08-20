@@ -1,10 +1,10 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
-import { Redis } from 'ioredis';
+import { Cluster } from 'ioredis';
 
 // 참조: https://medium.com/@akintobiidris/using-redis-client-in-nestjs-3fe80eb91a49
 @Injectable()
 export class RedisRepository implements OnModuleDestroy {
-  constructor(@Inject('RedisClient') private readonly redisClient: Redis) {}
+  constructor(@Inject('RedisClient') private readonly redisClient: Cluster) {}
 
   onModuleDestroy(): void {
     this.redisClient.disconnect();
