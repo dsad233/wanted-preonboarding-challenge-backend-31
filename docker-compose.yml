@@ -51,7 +51,7 @@ services:
       - ./db/redis/slave2/logs:/var/log/redis/slave2
     command: redis-server /etc/redis/slave2/redis.conf
     ports:
-      - ${REDIS_SLAVE2_PORT} :6381
+      - ${REDIS_SLAVE2_PORT}:6381
       - 16381:16381
     networks:
       - server
