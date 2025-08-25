@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { winstonLogger } from './common/loggers/winston';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
+import * as http from 'http';
 
 declare const module: any;
 
@@ -20,12 +21,16 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  const configService = app.get(ConfigService);
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // shutdown hooks에 대한 리스닝 -> Lifecycle 이벤트 사용시 설정 필요
   app.enableShutdownHooks();
+  // connection 유지 설정
+  const server: http.Server = app.getHttpServer();
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
 
+  const configService = app.get(ConfigService);
   if (configService.get<string>('nodeEnv') === 'production') {
     // helmet 설정
     // 프로토콜 다운그레이드 공격, 쿠키 하이재킹 공격 차단
