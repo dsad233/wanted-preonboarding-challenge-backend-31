@@ -10,7 +10,7 @@ import {
   ProductReviewRequestDto,
 } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
-import { RedisRepository } from 'src/redis/redis.repository';
+import { RedisRepository } from '../redis/redis.repository';
 
 @Injectable()
 export class ProductsService {
