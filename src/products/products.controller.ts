@@ -25,7 +25,6 @@ import { ReqUser } from 'src/common/decorators/user.decorator';
 import { UserPayloadDto } from 'src/auth/dto/userPayloadDto';
 import { plainToClass } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { Public } from 'src/common/decorators/ispublic.decorator';
 
 @Controller('products')
 export class ProductsController {
@@ -41,14 +40,12 @@ export class ProductsController {
   }
 
   // 상품 목록 전체 조회
-  @Public()
   @Get()
   async find(@Query() productRequestDto: ProductRequestDto): Promise<object> {
     return await this.productsService.find(productRequestDto);
   }
 
   // 상품 목록 상세 조회
-  @Public()
   @Get('/:id')
   async findOne(@Param('id') id: string): Promise<object> {
     return await this.productsService.findOne(id);

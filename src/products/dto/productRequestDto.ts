@@ -1,5 +1,5 @@
 import { STATUS } from '@libs/enums';
-import { Transform, Type } from 'class-transformer';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -39,11 +39,13 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 판매자 ID
   @IsOptional()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @IsString()
   seller?: string;
 
   // 브랜드 ID
   @IsOptional()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   @IsString()
   brand?: string;
 
@@ -55,6 +57,7 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 검색어
   @IsOptional()
+  @Transform(({ value }: TransformFnParams) => value?.trim().toLowerCase())
   @IsString()
   search?: string;
 }

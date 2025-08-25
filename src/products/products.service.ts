@@ -10,10 +10,14 @@ import {
   ProductReviewRequestDto,
 } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
+import { RedisRepository } from 'src/redis/redis.repository';
 
 @Injectable()
 export class ProductsService {
-  constructor(private productsRepository: ProductsRepository) {}
+  constructor(
+    private productsRepository: ProductsRepository,
+    private redisRepository: RedisRepository,
+  ) {}
 
   // 상품 생성
   async create({
@@ -83,30 +87,77 @@ export class ProductsService {
 
   // 상품 목록 전체 조회
   async find(productRequestDto: ProductRequestDto): Promise<object> {
-    const products = await this.productsRepository.find(productRequestDto);
-    return {
-      success: true,
-      data: {
-        items: products,
-        pagination: {
-          total_items: products.length,
-          total_pages: Math.ceil(products.length / productRequestDto.getTake()),
-          current_page: productRequestDto.getPage(),
-          per_page: productRequestDto.getTake(),
+    const cached = await this.redisRepository.get(
+      `products:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
+    );
+
+    if (!cached) {
+      const products = await this.productsRepository.find(productRequestDto);
+      await this.redisRepository.setex(
+        `products:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
+        120000,
+        JSON.stringify(products),
+      );
+
+      return {
+        success: true,
+        data: {
+          items: products,
+          pagination: {
+            total_items: products.length,
+            total_pages: Math.ceil(
+              products.length / productRequestDto.getTake(),
+            ),
+            current_page: productRequestDto.getPage(),
+            per_page: productRequestDto.getTake(),
+          },
         },
-      },
-      message: '상품 목록을 성공적으로 조회했습니다.',
-    };
+        message: '상품 목록을 성공적으로 조회했습니다.',
+      };
+    } else {
+      return {
+        success: true,
+        data: {
+          items: JSON.parse(cached),
+          pagination: {
+            total_items: JSON.parse(cached).length,
+            total_pages: Math.ceil(
+              JSON.parse(cached).length / productRequestDto.getTake(),
+            ),
+            current_page: productRequestDto.getPage(),
+            per_page: productRequestDto.getTake(),
+          },
+        },
+        message: '상품 목록을 성공적으로 조회했습니다.',
+      };
+    }
   }
 
   // 상품 목록 상세 조회
   async findOne(id: string): Promise<object> {
-    const product = await this.productsRepository.findOne(id);
-    return {
-      success: true,
-      data: product,
-      message: '상품 상세 정보를 성공적으로 조회했습니다.',
-    };
+    const cached = await this.redisRepository.get(`product:id=${id}`);
+
+    if (!cached) {
+      const product = await this.productsRepository.findOne(id);
+
+      await this.redisRepository.setex(
+        `product:id=${id}`,
+        300000,
+        JSON.stringify(product),
+      );
+
+      return {
+        success: true,
+        data: product,
+        message: '상품 상세 정보를 성공적으로 조회했습니다.',
+      };
+    } else {
+      return {
+        success: true,
+        data: JSON.parse(cached),
+        message: '상품 상세 정보를 성공적으로 조회했습니다.',
+      };
+    }
   }
 
   // 상품 목록 수정

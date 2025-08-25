@@ -207,8 +207,10 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productCategories', 'productCategories')
       .leftJoinAndSelect('productCategories.category', 'category')
       .leftJoinAndSelect('product.productOptionGroups', 'productOptionGroups')
-      .leftJoinAndSelect('productOptionGroups.productOptions', 'productOptions')
-      .cache('product_find', 120000);
+      .leftJoinAndSelect(
+        'productOptionGroups.productOptions',
+        'productOptions',
+      );
 
     if (productRequestDto.page) {
       products.skip(productRequestDto.getSkip());
@@ -345,8 +347,7 @@ export class ProductsRepository extends BaseRepository {
       .leftJoinAndSelect('product.productImages', 'productImages')
       .leftJoinAndSelect('product.productTags', 'productTags')
       .leftJoinAndSelect('productTags.tag', 'tag')
-      .leftJoinAndSelect('product.reviews', 'reviews')
-      .cache('product_findOne', 300000);
+      .leftJoinAndSelect('product.reviews', 'reviews');
 
     const result = await product.getOne();
     if (!result) {
