@@ -3,6 +3,7 @@ import { ProductCategoriesService } from './product-categories.service';
 import { ProductCategoriesController } from './product-categories.controller';
 import { ProductCategoriesRepository } from './product-categories.repository';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
         limit: 100,
       },
     ]),
+    RedisModule,
   ],
   controllers: [ProductCategoriesController],
   providers: [ProductCategoriesService, ProductCategoriesRepository],

@@ -12,4 +12,8 @@ export enum PrefixType {
   PRODUCT = 'PRODUCT',
   // product_find Method
   PRODUCTS = 'PRODUCTS',
+  // product_category_find Method
+  CATEGORIES = 'CATEGORIES',
+  // product_category_findOne Method
+  CATEGORY = 'CATEGORY',
 }

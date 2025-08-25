@@ -13,9 +13,16 @@ export const RedisConfig: FactoryProvider<Cluster> = {
         },
       ],
       {
+        clusterRetryStrategy: function (times) {
+          const delay = Math.min(100 + times * 2, 2000);
+          return delay;
+        },
+        scaleReads: 'master',
         retryDelayOnMoved: 100,
+        retryDelayOnFailover: 100,
+        retryDelayOnClusterDown: 100,
         slotsRefreshTimeout: 1000,
-        slotsRefreshInterval: 5000,
+        slotsRefreshInterval: 3000,
         redisOptions: {
           password: configService.getOrThrow<string>('redis.pass'),
           maxRetriesPerRequest: 3,

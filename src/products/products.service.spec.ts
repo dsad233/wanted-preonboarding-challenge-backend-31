@@ -413,10 +413,10 @@ describe('ProductsService', () => {
 
       const find = await productsService.find(productRequestDto);
 
-      expect(redisRepository.get).toHaveBeenCalledTimes(1);
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
       );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
       expect(find).toEqual({
         success: true,
@@ -526,20 +526,20 @@ describe('ProductsService', () => {
 
       const find = await productsService.find(productRequestDto);
 
-      expect(redisRepository.get).toHaveBeenCalledTimes(1);
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
       );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-      expect(productsRepository.find).toHaveBeenCalledTimes(1);
       expect(productsRepository.find).toHaveBeenCalledWith(productRequestDto);
+      expect(productsRepository.find).toHaveBeenCalledTimes(1);
 
-      expect(redisRepository.setex).toHaveBeenCalledTimes(1);
       expect(redisRepository.setex).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
         120000,
         JSON.stringify(products),
       );
+      expect(redisRepository.setex).toHaveBeenCalledTimes(1);
 
       expect(find).toEqual({
         success: true,
@@ -771,10 +771,10 @@ describe('ProductsService', () => {
 
       const findOne = await productsService.findOne(productId);
 
-      expect(redisRepository.get).toHaveBeenCalledTimes(1);
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
       );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
       expect(findOne).toEqual({
         success: true,
@@ -994,20 +994,20 @@ describe('ProductsService', () => {
 
       const findOne = await productsService.findOne(productId);
 
-      expect(redisRepository.get).toHaveBeenCalledTimes(1);
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
       );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-      expect(productsRepository.findOne).toHaveBeenCalledTimes(1);
       expect(productsRepository.findOne).toHaveBeenCalledWith(productId);
+      expect(productsRepository.findOne).toHaveBeenCalledTimes(1);
 
-      expect(redisRepository.setex).toHaveBeenCalledTimes(1);
       expect(redisRepository.setex).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
         300000,
         JSON.stringify(product),
       );
+      expect(redisRepository.setex).toHaveBeenCalledTimes(1);
 
       expect(findOne).toEqual({
         success: true,
