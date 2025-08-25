@@ -11,6 +11,7 @@ import {
 } from './dto/productRequestDto';
 import { UpdateProductPackageDto } from './dto/updateProductDto';
 import { RedisRepository } from '../redis/redis.repository';
+import { TYPE } from '@libs/enums';
 
 @Injectable()
 export class ProductsService {
@@ -88,13 +89,13 @@ export class ProductsService {
   // 상품 목록 전체 조회
   async find(productRequestDto: ProductRequestDto): Promise<object> {
     const cached = await this.redisRepository.get(
-      `products:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
+      `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
     );
 
     if (!cached) {
       const products = await this.productsRepository.find(productRequestDto);
       await this.redisRepository.setex(
-        `products:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
+        `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
         120000,
         JSON.stringify(products),
       );
@@ -135,13 +136,15 @@ export class ProductsService {
 
   // 상품 목록 상세 조회
   async findOne(id: string): Promise<object> {
-    const cached = await this.redisRepository.get(`product:id=${id}`);
+    const cached = await this.redisRepository.get(
+      `${TYPE.PrefixType.PRODUCT}:id=${id}`,
+    );
 
     if (!cached) {
       const product = await this.productsRepository.findOne(id);
 
       await this.redisRepository.setex(
-        `product:id=${id}`,
+        `${TYPE.PrefixType.PRODUCT}:id=${id}`,
         300000,
         JSON.stringify(product),
       );
