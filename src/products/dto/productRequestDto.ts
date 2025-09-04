@@ -15,6 +15,7 @@ export class ProductRequestDto extends PaginationRequestDto {
   // 상품 상태 필터
   @IsOptional()
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   sort?: string;
 
   @IsOptional()
@@ -33,20 +34,20 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 카테고리 ID Array []
   @IsOptional()
-  @Transform(({ value }) => (value?.length ? [...value.split(',')] : undefined))
   @IsArray()
+  @Transform(({ value }) => (value?.length ? [...value.split(',')] : undefined))
   category?: string[];
 
   // 판매자 ID
   @IsOptional()
-  @Transform(({ value }: TransformFnParams) => value?.trim())
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   seller?: string;
 
   // 브랜드 ID
   @IsOptional()
-  @Transform(({ value }: TransformFnParams) => value?.trim())
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   brand?: string;
 
   // 재고 유무 필터
@@ -57,8 +58,8 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 검색어
   @IsOptional()
-  @Transform(({ value }: TransformFnParams) => value?.trim().toLowerCase())
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim().toLowerCase())
   search?: string;
 }
 
@@ -67,6 +68,7 @@ export class ProductReviewRequestDto extends PaginationRequestDto {
   // 상품 상태 필터
   @IsOptional()
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   sort?: string;
 
   // 평점 필터 (1-5)

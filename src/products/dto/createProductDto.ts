@@ -1,13 +1,5 @@
-import {
-  Product,
-  ProductCategory,
-  ProductDetail,
-  ProductPrice,
-  ProductTag,
-} from '@libs/database/entities';
-import { STATUS } from '@libs/enums';
-import { PartialType, PickType } from '@nestjs/mapped-types';
-import { Type } from 'class-transformer';
+import { STATUS, TYPE } from '@libs/enums';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -18,49 +10,90 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  registerDecorator,
   ValidateNested,
+  ValidationOptions,
 } from 'class-validator';
 
-export class CreateProductDto extends PickType(Product, [
-  'sellerId',
-  'brandId',
-]) {
-  @IsNotEmpty({ message: '상품명은 필수 항목입니다.' })
+export class CreateProductDto {
+  @IsNotEmpty({ message: 'name(상품명)은 필수 항목입니다.' })
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   name: string;
 
-  @IsNotEmpty({ message: 'URL 슬러그는 필수 항목입니다.' })
+  @IsNotEmpty({ message: 'slug(URL 슬러그)는 필수 항목입니다.' })
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   slug: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(500, { message: 'Max Length 500' })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   shortDescription?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   fullDescription?: string;
 
-  @IsNotEmpty({ message: '상품 상태 정보는 필수 항목입니다.' })
+  @IsNotEmpty({ message: 'sellerId는 필수 항목입니다.' })
+  @IsUUID()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  sellerId: string;
+
+  @IsNotEmpty({ message: 'brandId는 필수 항목입니다.' })
+  @IsUUID()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  brandId: string;
+
+  @IsNotEmpty({ message: 'status(상품 상태 정보)는 필수 항목입니다.' })
   @IsEnum(STATUS.ProductStatus)
   @MaxLength(20, { message: 'Max Length 20' })
   status: STATUS.ProductStatus;
 }
 
 // 상품 상세 정보 생성 DTO
-export class CreateProductDetailDto extends PartialType(ProductDetail) {
+export class CreateProductDetailDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1, { message: '무게 값은 0보다 커야 합니다.' })
   weight?: number;
+
+  @IsOptional()
+  @IsJsonObject({ message: '올바르지 않은 타입 입니다.' })
+  dimensions?: Record<string, number>;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  materials?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  countryOfOrigin?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  warrantyInfo?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  careInstructions?: string;
+
+  @IsOptional()
+  @IsJsonObject({ message: '올바르지 않은 타입 입니다.' })
+  additionalInfo?: Record<string, number>;
 }
 
 // 상품 가격 정보 생성 DTO
-export class CreateProductPriceDto extends PartialType(ProductPrice) {
+export class CreateProductPriceDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1, { message: '기본 가격은 0보다 커야 합니다.' })
@@ -79,6 +112,10 @@ export class CreateProductPriceDto extends PartialType(ProductPrice) {
   costPrice?: number;
 
   @IsOptional()
+  @IsEnum(TYPE.CurrencyType)
+  currency?: TYPE.CurrencyType;
+
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1, { message: '세율은 0보다 커야 합니다.' })
@@ -86,9 +123,12 @@ export class CreateProductPriceDto extends PartialType(ProductPrice) {
 }
 
 // 상품 카테고리 정보 생성 DTO
-export class CreateProductCategoryDto extends PickType(ProductCategory, [
-  'categoryId',
-]) {
+export class CreateProductCategoryDto {
+  @IsNotEmpty({ message: 'categoryId는 필수 항목입니다.' })
+  @IsUUID()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  categoryId: string;
+
   @IsOptional()
   @IsBoolean()
   isPrimary?: boolean;
@@ -96,12 +136,13 @@ export class CreateProductCategoryDto extends PickType(ProductCategory, [
 
 // 상품 옵션 그룹 정보 생성 DTO
 export class CreateProductOptionGroupDto {
-  @IsNotEmpty({ message: '상품 옵션 그룹명은 필수 항목입니다.' })
+  @IsNotEmpty({ message: 'name(상품 옵션 그룹명)은 필수 항목입니다.' })
   @IsString()
   @MaxLength(100, { message: 'Max Length 100' })
   name: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   displayOrder?: number;
 
@@ -112,7 +153,7 @@ export class CreateProductOptionGroupDto {
 
 // 상품 옵션 정보 생성 DTO
 export class CreateProductOptionDto {
-  @IsNotEmpty({ message: '상품명은 필수 항목입니다.' })
+  @IsNotEmpty({ message: 'name(옵션명)은 필수 항목입니다.' })
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
   name: string;
@@ -139,14 +180,16 @@ export class CreateProductOptionDto {
 
 // 상품 이미지 생성 DTO
 export class CreateProductImageDto {
-  @IsNotEmpty({ message: 'url 항목은 필수 항목입니다.' })
+  @IsNotEmpty({ message: 'url(이미지 URL) 항목은 필수 항목입니다.' })
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   url: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(255, { message: 'Max Length 255' })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   altText?: string;
 
   @IsOptional()
@@ -155,6 +198,7 @@ export class CreateProductImageDto {
 
   @IsOptional()
   @IsUUID()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   optionId?: string;
 
   @IsOptional()
@@ -163,7 +207,12 @@ export class CreateProductImageDto {
 }
 
 // 상품 태그 생성 DTO
-export class CreateProductTagDto extends PickType(ProductTag, ['tagId']) {}
+export class CreateProductTagDto {
+  @IsNotEmpty({ message: 'tagId는 필수 항목입니다.' })
+  @IsUUID()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  tagId: string;
+}
 
 // 상품 등록 통합 DTO
 export class CreateProductPackageDto {
@@ -202,12 +251,57 @@ export class CreateProductPackageDto {
 
 // 상품 리뷰 등록 DTO
 export class CreateProductReviewDto {
+  @IsNotEmpty({ message: 'rating(평점)은 필수 항목입니다.' })
   @IsNumber()
   rating: number;
 
+  @IsNotEmpty({ message: 'title(리뷰 제목)은 필수 항목입니다.' })
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   title: string;
 
+  @IsNotEmpty({ message: 'content(리뷰 내용)은 필수 항목입니다.' })
   @IsString()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
   content: string;
+}
+
+// 사용자 지정 Json 타입 검증
+// 참고: https://stackoverflow.com/questions/76834738/nestjs-postgresql-dto-store-jsonb-gives-must-be-a-json-string-error
+function IsJsonObject(validationOptions?: ValidationOptions) {
+  return function (object: NonNullable<unknown>, propertyName: string) {
+    registerDecorator({
+      name: 'isJsonObject',
+      target: object.constructor,
+      propertyName: propertyName,
+      constraints: [],
+      options: validationOptions,
+      validator: {
+        validate(value: any) {
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              // Ensure the parsed value is an object and not an array or null
+              return (
+                parsed !== null &&
+                typeof parsed === 'object' &&
+                !Array.isArray(parsed)
+              );
+            } catch (e) {
+              console.error(e);
+              return false;
+            }
+          } else if (
+            typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value)
+          ) {
+            // Directly validate objects (but not arrays or null)
+            return true;
+          }
+          return false;
+        },
+      },
+    });
+  };
 }

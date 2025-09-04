@@ -4,6 +4,11 @@ export enum TokenType {
   REFRESH = 'REFRESH',
 }
 
+// 화폐 통화 타입
+export enum CurrencyType {
+  KRW = 'KRW',
+}
+
 // Redis Prefix
 export enum PrefixType {
   // token session

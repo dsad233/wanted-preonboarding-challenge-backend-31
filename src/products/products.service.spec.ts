@@ -71,7 +71,6 @@ describe('ProductsService', () => {
       };
 
       const newProductDetail: CreateProductDetailDto = {
-        productId: '5affd8e7-4490-4562-b549-cc5cbfe0c4ca',
         weight: 100,
         dimensions: {
           width: 100,
@@ -89,11 +88,10 @@ describe('ProductsService', () => {
       };
 
       const newProductPrice: CreateProductPriceDto = {
-        productId: '5affd8e7-4490-4562-b549-cc5cbfe0c4ca',
         basePrice: 1000,
         salePrice: 1000,
         costPrice: 1000,
-        currency: 'KRW',
+        currency: TYPE.CurrencyType.KRW,
         taxRate: 10,
       };
 
@@ -348,7 +346,7 @@ describe('ProductsService', () => {
           short_description: 'test-short-description',
           base_price: 1000,
           sale_price: 1000,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           primary_image: [
             {
               url: 'http://test.com',
@@ -380,7 +378,7 @@ describe('ProductsService', () => {
           short_description: 'test-short-description-1',
           base_price: 1001,
           sale_price: 1001,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           primary_image: [
             {
               url: 'http://test2.com',
@@ -461,7 +459,7 @@ describe('ProductsService', () => {
           short_description: 'test-short-description',
           base_price: 1000,
           sale_price: 1000,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           primary_image: [
             {
               url: 'http://test.com',
@@ -493,7 +491,7 @@ describe('ProductsService', () => {
           short_description: 'test-short-description-1',
           base_price: 1001,
           sale_price: 1001,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           primary_image: [
             {
               url: 'http://test2.com',
@@ -606,7 +604,7 @@ describe('ProductsService', () => {
         price: {
           base_price: 1000,
           sale_price: 1000,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           tax_rate: 10,
           discount_percentage: 10,
         },
@@ -741,7 +739,7 @@ describe('ProductsService', () => {
             ],
             base_price: 1000,
             sale_price: 1000,
-            currency: 'KRW',
+            currency: TYPE.CurrencyType.KRW,
           },
           {
             id: '340dd4b1-f14d-48fe-9ed3-c8f3e6c32eec',
@@ -760,7 +758,7 @@ describe('ProductsService', () => {
             ],
             base_price: 1001,
             sale_price: 1001,
-            currency: 'KRW',
+            currency: TYPE.CurrencyType.KRW,
           },
         ],
       };
@@ -829,7 +827,7 @@ describe('ProductsService', () => {
         price: {
           base_price: 1000,
           sale_price: 1000,
-          currency: 'KRW',
+          currency: TYPE.CurrencyType.KRW,
           tax_rate: 10,
           discount_percentage: 10,
         },
@@ -964,7 +962,7 @@ describe('ProductsService', () => {
             ],
             base_price: 1000,
             sale_price: 1000,
-            currency: 'KRW',
+            currency: TYPE.CurrencyType.KRW,
           },
           {
             id: '340dd4b1-f14d-48fe-9ed3-c8f3e6c32eec',
@@ -983,7 +981,7 @@ describe('ProductsService', () => {
             ],
             base_price: 1001,
             sale_price: 1001,
-            currency: 'KRW',
+            currency: TYPE.CurrencyType.KRW,
           },
         ],
       };
@@ -1045,7 +1043,6 @@ describe('ProductsService', () => {
       };
 
       const newProductDetail: UpdateProductDetailDto = {
-        productId: '5affd8e7-4490-4562-b549-cc5cbfe0c4ca',
         weight: 100,
         dimensions: {
           width: 100,
@@ -1063,11 +1060,10 @@ describe('ProductsService', () => {
       };
 
       const newProductPrice: UpdateProductPriceDto = {
-        productId: '5affd8e7-4490-4562-b549-cc5cbfe0c4ca',
         basePrice: 1000,
         salePrice: 1000,
         costPrice: 1000,
-        currency: 'KRW',
+        currency: TYPE.CurrencyType.KRW,
         taxRate: 10,
       };
 

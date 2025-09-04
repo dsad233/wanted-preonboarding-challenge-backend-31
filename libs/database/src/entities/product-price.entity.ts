@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
+import { TYPE } from '@libs/enums';
 
 @Index('INDEX_PRODUCT_PRICE_PRODUCTID', ['productId'])
 @Entity({
@@ -53,10 +54,10 @@ export class ProductPrice {
   @Column('varchar', {
     name: 'currency',
     length: 3,
-    default: 'KRW',
+    default: TYPE.CurrencyType.KRW,
     comment: '통화 (기본값 KRW)',
   })
-  currency: string;
+  currency: TYPE.CurrencyType;
 
   @Column('decimal', {
     name: 'tax_rate',
