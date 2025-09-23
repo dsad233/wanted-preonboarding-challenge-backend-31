@@ -78,14 +78,14 @@ export class AuthService {
 
     // acessToken 설정
     await this.redisRepository.setex(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.ACCESS}:${user.id}:${user.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.ACCESS}:userId=${user.id}:email=${user.email}`,
       this.configService.getOrThrow<number>('jwt.tokenTtl'),
       JSON.stringify(accessTokenSession),
     );
 
     // refreshToken 설정
     await this.redisRepository.setex(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.REFRESH}:userId=${user.id}:email=${user.email}`,
       this.configService.getOrThrow<number>('jwt.refreshTokenTtl'),
       JSON.stringify(refreshTokenSession),
     );
@@ -96,7 +96,7 @@ export class AuthService {
   // 토큰 재발급
   async reissueToken(user: UserPayloadDto): Promise<object> {
     const getSession = await this.redisRepository.get(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.REFRESH}:userId=${user.id}:email=${user.email}`,
     );
     if (!getSession) {
       throw new HttpException('Not Found User', HttpStatus.BAD_REQUEST);
@@ -145,20 +145,20 @@ export class AuthService {
 
     // 기존 세션 삭제
     await this.redisRepository.del(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.ACCESS}:${userData.id}:${userData.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.ACCESS}:userId=${userData.id}:email=${userData.email}`,
     );
     await this.redisRepository.del(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.REFRESH}:${userData.id}:${userData.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.REFRESH}:userId=${userData.id}:email=${userData.email}`,
     );
     // 새로운 세션 설정
     await this.redisRepository.setex(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.ACCESS}:${userData.id}:${userData.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.ACCESS}:userId=${userData.id}:email=${userData.email}`,
       this.configService.getOrThrow<number>('jwt.tokenTtl'),
       JSON.stringify(accessTokenSession),
     );
 
     await this.redisRepository.setex(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.REFRESH}:${userData.id}:${userData.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.REFRESH}:userId=${userData.id}:email=${userData.email}`,
       this.configService.getOrThrow<number>('jwt.refreshTokenTtl'),
       JSON.stringify(refreshTokenSession),
     );
@@ -169,10 +169,10 @@ export class AuthService {
   // 로그아웃
   async signOut(user: UserPayloadDto): Promise<object> {
     await this.redisRepository.del(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.ACCESS}:${user.id}:${user.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.ACCESS}:userId=${user.id}:email=${user.email}`,
     );
     await this.redisRepository.del(
-      `${TYPE.PrefixType.SESSION}:${TYPE.TokenType.REFRESH}:${user.id}:${user.email}`,
+      `${TYPE.PrefixType.SESSION}:type=${TYPE.TokenType.REFRESH}:userId=${user.id}:email=${user.email}`,
     );
     return { success: true, message: '요청이 성공적으로 처리되었습니다.' };
   }

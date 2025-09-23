@@ -137,14 +137,14 @@ export class ProductsService {
   // 상품 목록 상세 조회
   async findOne(id: string): Promise<object> {
     const cached = await this.redisRepository.get(
-      `${TYPE.PrefixType.PRODUCT}:id=${id}`,
+      `${TYPE.PrefixType.PRODUCT}:productId=${id}`,
     );
 
     if (!cached) {
       const product = await this.productsRepository.findOne(id);
 
       await this.redisRepository.setex(
-        `${TYPE.PrefixType.PRODUCT}:id=${id}`,
+        `${TYPE.PrefixType.PRODUCT}:productId=${id}`,
         300000,
         JSON.stringify(product),
       );

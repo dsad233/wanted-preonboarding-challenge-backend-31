@@ -770,7 +770,7 @@ describe('ProductsService', () => {
       const findOne = await productsService.findOne(productId);
 
       expect(redisRepository.get).toHaveBeenCalledWith(
-        `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
+        `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
@@ -993,7 +993,7 @@ describe('ProductsService', () => {
       const findOne = await productsService.findOne(productId);
 
       expect(redisRepository.get).toHaveBeenCalledWith(
-        `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
+        `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
@@ -1001,7 +1001,7 @@ describe('ProductsService', () => {
       expect(productsRepository.findOne).toHaveBeenCalledTimes(1);
 
       expect(redisRepository.setex).toHaveBeenCalledWith(
-        `${TYPE.PrefixType.PRODUCT}:id=${productId}`,
+        `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
         300000,
         JSON.stringify(product),
       );
