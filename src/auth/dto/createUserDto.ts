@@ -1,5 +1,11 @@
 import { Transform, TransformFnParams } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Require Name' })
@@ -9,7 +15,7 @@ export class CreateUserDto {
   name: string;
 
   @IsNotEmpty({ message: 'Require Email' })
-  @IsString()
+  @IsEmail()
   @MaxLength(100, { message: 'Max Length 100' })
   @Transform(({ value }: TransformFnParams) => value?.trim())
   email: string;
