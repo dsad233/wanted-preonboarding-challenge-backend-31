@@ -1,0 +1,96 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-15
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: ${TZ}
+    volumes:
+      - ../../db/postgres-data:/var/lib/postgresql/data
+      - ../../db/postgres-data/logs:/var/log/postgresql
+    platform: linux/x86_64
+    restart: always
+    networks:
+      - server
+  redis-cluster:
+    image: redis:7.4.3
+    container_name: redis-master
+    volumes:
+      - ../../db/redis/master/data:/var/lib/redis/master
+      - ../../db/redis/master/conf/redis.conf:/etc/redis/master/redis.conf
+      - ../../db/redis/master/logs:/var/log/redis/master
+    command: redis-server /etc/redis/master/redis.conf
+    ports:
+      - ${REDIS_MASTER_PORT}:6379
+      - 16379:16379
+    networks:
+      - server
+  redis-node-1:
+    image: redis:7.4.3
+    container_name: redis-slave1
+    volumes:
+      - ../../db/redis/slave1/data:/var/lib/redis/slave1
+      - ../../db/redis/slave1/conf/redis.conf:/etc/redis/slave1/redis.conf
+      - ../../db/redis/slave1/logs:/var/log/redis/slave1
+    command: redis-server /etc/redis/slave1/redis.conf
+    ports:
+      - ${REDIS_SLAVE1_PORT}:6380
+      - 16380:16380
+    networks:
+      - server
+  redis-node-2:
+    image: redis:7.4.3
+    container_name: redis-slave2
+    volumes:
+      - ../../db/redis/slave2/data:/var/lib/redis/slave2
+      - ../../db/redis/slave2/conf/redis.conf:/etc/redis/slave2/redis.conf
+      - ../../db/redis/slave2/logs:/var/log/redis/slave2
+    command: redis-server /etc/redis/slave2/redis.conf
+    ports:
+      - ${REDIS_SLAVE2_PORT}:6381
+      - 16381:16381
+    networks:
+      - server
+  redis-cluster-entry:
+    image: redis:7.4.3
+    container_name: redis-cluster-entry
+    command: redis-cli -a ${REDIS_PASS} --cluster create redis-cluster:${REDIS_MASTER_PORT} redis-node-1:${REDIS_SLAVE1_PORT} redis-node-2:${REDIS_SLAVE2_PORT} --cluster-yes
+    depends_on:
+      - redis-cluster
+      - redis-node-1
+      - redis-node-2
+    networks:
+      - server
+  server-app-dev:
+    build:
+      context: ../../
+      dockerfile: docker/dev/Dockerfile.dev
+    container_name: server-app-dev
+    depends_on:
+      - postgres-db
+      - redis-cluster
+      - redis-node-1
+      - redis-node-2
+    volumes:
+      - ../../.:/home/app/dev
+      - /home/app/dev/node_modules
+    expose:
+      - ${PORT}
+    ports:
+      - ${PORT}:3001
+    env_file:
+      - ../../.env.development
+    command: npm run start:dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    restart: always
+    networks:
+      - server
+networks:
+  server:
+    driver: bridge
+    external: true

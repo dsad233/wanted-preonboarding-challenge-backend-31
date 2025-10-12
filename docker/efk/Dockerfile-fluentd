@@ -1,0 +1,14 @@
+# Content-Type 이슈 
+# Link: https://github.com/elastic/elasticsearch-ruby/issues/2665#issue-3015175124 
+
+FROM fluent/fluentd:v1.18-debian
+
+USER root
+
+RUN apt update -y && \
+    gem install fluent-plugin-elasticsearch --no-document && \
+    # 권한으로 인한 pos 폴더 수동 생성
+    mkdir -p /var/log/fluentd/pos && \
+    chown -R fluent:fluent /var/log/fluentd/pos
+    
+USER fluent

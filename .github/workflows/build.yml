@@ -1,0 +1,130 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  # pull_request:
+  #   branches:
+  #       - main
+  #   types:
+  #     - closed
+
+# concurrency:
+#   group: ${{ github.head_ref || github.run_id }}
+#   cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    # if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
+    name: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: ['18.x', '20.x', '22.x']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: |
+            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Run lint
+        run: npm run lint
+
+  test:
+    name: test
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: ['18.x', '20.x', '22.x']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Get npm cache directory
+        id: npm-cache
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: |
+            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Run tests
+        run: npm test
+
+  build:
+    name: build
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: ['18.x', '20.x', '22.x']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Get npm cache directory
+        id: npm-cache
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: |
+            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Run build
+        run: npm run build --if-present
+
+  deploy:
+    needs: ['lint', 'test', 'build']
+    uses: './.github/workflows/deploy.yml'
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+      AWS_ECS_CONTAINER_TASK_NAME: ${{ secrets.AWS_ECS_CONTAINER_TASK_NAME }}
+      AWS_ECS_CONTAINER_NAME: ${{ secrets.AWS_ECS_CONTAINER_NAME }}
+      AWS_ECS_CONTAINER_SERVICE: ${{ secrets.AWS_ECS_CONTAINER_SERVICE }}
+      AWS_ECS_CONTAINER_CLUSTER: ${{ secrets.AWS_ECS_CONTAINER_CLUSTER }}

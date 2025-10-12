@@ -1,0 +1,75 @@
+name: deploy
+
+on:
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        description: 'AWS_ACCESS_KEY_ID'
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+        description: 'AWS_SECRET_ACCESS_KEY'
+      AWS_REGION:
+        required: true
+        description: 'AWS_REGION'
+      AWS_ECR_REPOSITORY:
+        required: true
+        description: 'AWS_ECR_REPOSITORY'
+      AWS_ECS_CONTAINER_TASK_NAME:
+        required: true
+        description: 'AWS_ECS_CONTAINER_TASK_NAME'
+      AWS_ECS_CONTAINER_NAME:
+        required: true
+        description: 'AWS_ECS_CONTAINER_NAME'
+      AWS_ECS_CONTAINER_SERVICE:
+        required: true
+        description: 'AWS_ECS_CONTAINER_SERVICE'
+      AWS_ECS_CONTAINER_CLUSTER:
+        required: true
+        description: 'AWS_ECS_CONTAINER_CLUSTER'
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Pull docker image to Amazon ECR
+        id: pull-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+          IMAGE_TAG: prod
+        # AWS ECR에 업로드 되어 있는 해당 이미지로 교체
+        run: |
+          echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      - name: Retrieve most recent ECS task definition JSON file
+        id: retrieve-task-def
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ secrets.AWS_ECS_CONTAINER_TASK_NAME }} --query taskDefinition > task-definition.json
+          cat task-definition.json
+          echo "task-def-file=task-definition.json" >> $GITHUB_OUTPUT
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ secrets.AWS_ECS_CONTAINER_NAME }}
+          image: ${{ steps.pull-image.outputs.image }}
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ secrets.AWS_ECS_CONTAINER_SERVICE }}
+          cluster: ${{ secrets.AWS_ECS_CONTAINER_CLUSTER }}
+          wait-for-service-stability: true
