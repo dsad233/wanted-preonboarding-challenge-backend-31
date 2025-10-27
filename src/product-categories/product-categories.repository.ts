@@ -73,23 +73,12 @@ export class ProductCategoriesRepository extends BaseRepository {
     id: string,
     productCategoryRequestDto: ProductCategoryRequestDto,
   ) {
-    const categoryIds = [id];
-
-    // 해당 카테고리 ID에 속해 있는 하위 카테고리 항목을 조회
-    if (productCategoryRequestDto.includeSubcategories) {
-      const childCategories = await this.getRepository(Category).find({
-        where: { parentId: id },
-        select: ['id'],
-      });
-
-      const childIds = childCategories.map((cat) => cat.id);
-      categoryIds.push(...childIds);
-    }
-
     const category = this.getRepository(Category)
       .createQueryBuilder('category')
       .leftJoinAndSelect('category.parentCategory', 'parentCategory')
-      .where('category.id IN (:...categoryIds)', { categoryIds: categoryIds });
+      .where('category.id = :categoryId', {
+        categoryId: id,
+      });
 
     const categoryData = await category.getOne();
 
@@ -170,11 +159,14 @@ export class ProductCategoriesRepository extends BaseRepository {
         description: categoryData?.description,
         level: categoryData?.level,
         image_url: categoryData?.imageUrl,
-        parent: {
-          id: categoryData?.parentCategory?.id,
-          name: categoryData?.parentCategory?.name,
-          slug: categoryData?.parentCategory?.slug,
-        },
+        parent:
+          productCategoryRequestDto.includeSubcategories === false
+            ? undefined
+            : {
+                id: categoryData?.parentCategory?.id,
+                name: categoryData?.parentCategory?.name,
+                slug: categoryData?.parentCategory?.slug,
+              },
       },
       item: productArray,
       pagination: {
