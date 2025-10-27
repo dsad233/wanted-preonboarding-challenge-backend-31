@@ -9,6 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 import { PaginationRequestDto } from '../../common/pagination/paginationRequestDto';
+import { valueToBoolean } from '../../common/utils';
 
 // 상품 목록 조회 DTO
 export class ProductRequestDto extends PaginationRequestDto {
@@ -52,7 +53,7 @@ export class ProductRequestDto extends PaginationRequestDto {
 
   // 재고 유무 필터
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }: TransformFnParams) => valueToBoolean(value?.trim()))
   @IsBoolean()
   inStock?: boolean;
 
