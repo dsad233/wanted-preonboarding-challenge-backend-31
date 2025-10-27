@@ -10,10 +10,9 @@ import {
   IsUUID,
   MaxLength,
   Min,
-  registerDecorator,
   ValidateNested,
-  ValidationOptions,
 } from 'class-validator';
+import { IsJsonObject } from '../../common/utils';
 
 export class CreateProductDto {
   @IsNotEmpty({ message: 'name(상품명)은 필수 항목입니다.' })
@@ -264,44 +263,4 @@ export class CreateProductReviewDto {
   @IsString()
   @Transform(({ value }: TransformFnParams) => value?.trim())
   content: string;
-}
-
-// 사용자 지정 Json 타입 검증
-// 참고: https://stackoverflow.com/questions/76834738/nestjs-postgresql-dto-store-jsonb-gives-must-be-a-json-string-error
-function IsJsonObject(validationOptions?: ValidationOptions) {
-  return function (object: NonNullable<unknown>, propertyName: string) {
-    registerDecorator({
-      name: 'isJsonObject',
-      target: object.constructor,
-      propertyName: propertyName,
-      constraints: [],
-      options: validationOptions,
-      validator: {
-        validate(value: any) {
-          if (typeof value === 'string') {
-            try {
-              const parsed = JSON.parse(value);
-              // Ensure the parsed value is an object and not an array or null
-              return (
-                parsed !== null &&
-                typeof parsed === 'object' &&
-                !Array.isArray(parsed)
-              );
-            } catch (e) {
-              console.error(e);
-              return false;
-            }
-          } else if (
-            typeof value === 'object' &&
-            value !== null &&
-            !Array.isArray(value)
-          ) {
-            // Directly validate objects (but not arrays or null)
-            return true;
-          }
-          return false;
-        },
-      },
-    });
-  };
 }
