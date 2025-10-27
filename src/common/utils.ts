@@ -45,7 +45,7 @@ export function IsJsonObject(validationOptions?: ValidationOptions) {
 
 // Boolean 타입 검증 (dto 단에서 boolean 검증을 못하는 문제)
 // 참고: https://ilikezzi.tistory.com/26
-export function valueToBoolean(value: any) {
+export function valueToBoolean(value: string) {
   if (value === null || value === undefined) {
     return undefined;
   }
