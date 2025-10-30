@@ -44,6 +44,7 @@ export class ProductOptionsService {
       success: true,
       data: {
         id: option.id,
+        option_group_id: option.optionGroupId,
         name: option.name,
         additional_price: option.additionalPrice,
         sku: option.sku,

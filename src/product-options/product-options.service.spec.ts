@@ -103,6 +103,7 @@ describe('ProductOptionsService', () => {
           data: {
             id: productOption.id,
             name: productOption.name,
+            option_group_id: productOption.optionGroupId,
             additional_price: productOption.additionalPrice,
             sku: productOption.sku,
             stock: productOption.stock,
