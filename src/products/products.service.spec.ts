@@ -1,4 +1,4 @@
-import { Product, Review } from '@libs/database/entities';
+import { Product, ProductImage, Review } from '@libs/database/entities';
 import { ProductsRepository } from './products.repository';
 import { ProductsService } from './products.service';
 import { TestBed } from '@automock/jest';
@@ -200,7 +200,9 @@ describe('ProductsService', () => {
       jest
         .spyOn(productsRepository, 'createProductOptionGroup')
         .mockResolvedValue();
-      jest.spyOn(productsRepository, 'createProductImage').mockResolvedValue();
+      jest
+        .spyOn(productsRepository, 'createProductImage')
+        .mockResolvedValue(null);
       jest.spyOn(productsRepository, 'createProductTag').mockResolvedValue();
 
       const create = await productsService.create(productPackage);
@@ -404,10 +406,14 @@ describe('ProductsService', () => {
           created_at: new Date(),
         },
       ];
+      const productCount = products.length * 2;
 
       jest
         .spyOn(redisRepository, 'get')
         .mockResolvedValue(JSON.stringify(products));
+      jest
+        .spyOn(productsRepository, 'countProduct')
+        .mockResolvedValue(productCount);
 
       const find = await productsService.find(productRequestDto);
 
@@ -416,16 +422,16 @@ describe('ProductsService', () => {
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
+      expect(productsRepository.countProduct).toHaveBeenCalledWith();
+      expect(productsRepository.countProduct).toHaveBeenCalledTimes(1);
+
       expect(find).toEqual({
         success: true,
         data: {
           items: JSON.parse(JSON.stringify(products)),
           pagination: {
-            total_items: JSON.parse(JSON.stringify(products)).length,
-            total_pages: Math.ceil(
-              JSON.parse(JSON.stringify(products)).length /
-                productRequestDto.getTake(),
-            ),
+            total_items: productCount,
+            total_pages: Math.ceil(productCount / productRequestDto.getTake()),
             current_page: productRequestDto.getPage(),
             per_page: productRequestDto.getTake(),
           },
@@ -518,7 +524,12 @@ describe('ProductsService', () => {
         },
       ];
 
+      const productCount = products.length * 2;
+
       jest.spyOn(redisRepository, 'get').mockResolvedValue(undefined);
+      jest
+        .spyOn(productsRepository, 'countProduct')
+        .mockResolvedValue(productCount);
       jest.spyOn(productsRepository, 'find').mockResolvedValue(products);
       jest.spyOn(redisRepository, 'setex').mockResolvedValue();
 
@@ -528,6 +539,9 @@ describe('ProductsService', () => {
         `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
+
+      expect(productsRepository.countProduct).toHaveBeenCalledWith();
+      expect(productsRepository.countProduct).toHaveBeenCalledTimes(1);
 
       expect(productsRepository.find).toHaveBeenCalledWith(productRequestDto);
       expect(productsRepository.find).toHaveBeenCalledTimes(1);
@@ -544,10 +558,8 @@ describe('ProductsService', () => {
         data: {
           items: products,
           pagination: {
-            total_items: products.length,
-            total_pages: Math.ceil(
-              products.length / productRequestDto.getTake(),
-            ),
+            total_items: productCount,
+            total_pages: Math.ceil(productCount / productRequestDto.getTake()),
             current_page: productRequestDto.getPage(),
             per_page: productRequestDto.getTake(),
           },
@@ -1447,7 +1459,20 @@ describe('ProductsService', () => {
         },
       ];
 
-      jest.spyOn(productsRepository, 'createProductImage').mockResolvedValue();
+      const productImage = new ProductImage();
+      Object.assign(productImage, {
+        id: '1fd60d2b-640e-4920-aee0-cafe18f4dfef',
+        productId: '0197e97e-c532-4c2d-ad77-2d33c041a74c',
+        url: 'http://test1.com',
+        altText: 'test-text',
+        isPrimary: false,
+        optionId: '199eb4c6-ea17-489a-941d-bcfb1df548ed',
+        displayOrder: 3,
+      });
+
+      jest
+        .spyOn(productsRepository, 'createProductImage')
+        .mockResolvedValue(productImage);
 
       const create = await productsService.createImage(
         productId,
@@ -1462,6 +1487,14 @@ describe('ProductsService', () => {
 
       expect(create).toEqual({
         success: true,
+        data: {
+          id: productImage.id,
+          url: productImage.url,
+          alt_text: productImage.altText,
+          is_primary: productImage.isPrimary,
+          display_order: productImage.displayOrder,
+          option_id: productImage.optionId,
+        },
         message: '상품 이미지가 성공적으로 추가되었습니다.',
       });
     });

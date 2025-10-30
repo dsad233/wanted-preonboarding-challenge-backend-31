@@ -82,6 +82,24 @@ export class ProductsRepository extends BaseRepository {
     });
   }
 
+  // 상품 총 갯수 조회
+  async countProduct() {
+    return await this.getRepository(Product).count({
+      where: {
+        status: Not(STATUS.ProductStatus.DELETED),
+      },
+    });
+  }
+
+  // 상품 리뷰 총 갯수 조회
+  async countProductReview(productId: string) {
+    return await this.getRepository(Review).count({
+      where: {
+        productId: productId,
+      },
+    });
+  }
+
   // 상품 생성
   async createProduct(createProductDto: CreateProductDto) {
     const product = this.getRepository(Product).create({
@@ -176,7 +194,7 @@ export class ProductsRepository extends BaseRepository {
         ...newProductImage,
       });
 
-      await this.getRepository(ProductImage).save(productImage);
+      return await this.getRepository(ProductImage).save(productImage);
     }
   }
 
@@ -359,14 +377,14 @@ export class ProductsRepository extends BaseRepository {
     if (result.productCategories?.length) {
       for (const category of result.productCategories) {
         categoryArray.push({
-          id: category.category?.id,
-          name: category.category?.name,
-          slug: category.category?.slug,
-          is_primary: category.isPrimary,
+          id: category?.category.id,
+          name: category?.category.name,
+          slug: category?.category.slug,
+          is_primary: category?.isPrimary,
           parent: {
-            id: category.category?.parentCategory?.id,
-            name: category.category?.parentCategory?.name,
-            slug: category.category?.parentCategory?.slug,
+            id: category.category.parentCategory?.id,
+            name: category.category.parentCategory?.name,
+            slug: category.category.parentCategory?.slug,
           },
         });
       }
@@ -885,6 +903,8 @@ export class ProductsRepository extends BaseRepository {
       };
     });
 
+    const itemCount = await this.countProductReview(id);
+
     return {
       items: result,
       summary: {
@@ -899,10 +919,8 @@ export class ProductsRepository extends BaseRepository {
         },
       },
       pagination: {
-        total_items: reviews.length,
-        total_pages: Math.ceil(
-          reviews.length / productReviewRequestDto.getTake(),
-        ),
+        total_items: itemCount,
+        total_pages: Math.ceil(itemCount / productReviewRequestDto.getTake()),
         current_page: productReviewRequestDto.getPage(),
         per_page: productReviewRequestDto.getTake(),
       },
