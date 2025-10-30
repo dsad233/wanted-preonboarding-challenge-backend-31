@@ -3,7 +3,7 @@ import { Category, Product } from '@libs/database/entities';
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, Not } from 'typeorm';
 import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 import { STATUS } from '@libs/enums';
 
@@ -14,6 +14,15 @@ export class ProductCategoriesRepository extends BaseRepository {
     @Inject(REQUEST) request: Request,
   ) {
     super(defaultDataSource, request);
+  }
+
+  // 상품 총 갯수 조회
+  async countProduct() {
+    return await this.getRepository(Product).count({
+      where: {
+        status: Not(STATUS.ProductStatus.DELETED),
+      },
+    });
   }
 
   // 카테고리 목록 조회
@@ -43,7 +52,15 @@ export class ProductCategoriesRepository extends BaseRepository {
         const parent = map.get(data.parentId);
         if (parent) {
           // 원본 category 데이터에 parentId를 가지고 있는 데이터를 매핑
-          parent.children.push(data);
+          parent.children.push({
+            id: data.id,
+            name: data.name,
+            slug: data.slug,
+            description: data.description,
+            level: data.level,
+            image_url: data.imageUrl,
+            children: data.children,
+          });
         } else {
           roots.push(data);
         }
@@ -65,7 +82,17 @@ export class ProductCategoriesRepository extends BaseRepository {
 
     removeEmptyChildren(roots);
 
-    return roots;
+    return roots.map((data) => {
+      return {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        level: data.level,
+        image_url: data.imageUrl,
+        children: data.children,
+      };
+    });
   }
 
   // 특정 카테고리의 상품 목록 조회
@@ -151,6 +178,8 @@ export class ProductCategoriesRepository extends BaseRepository {
       });
     }
 
+    const itemCount = await this.countProduct();
+
     return {
       category: {
         id: categoryData?.id,
@@ -170,10 +199,8 @@ export class ProductCategoriesRepository extends BaseRepository {
       },
       item: productArray,
       pagination: {
-        total_items: productsData.length,
-        total_pages: Math.ceil(
-          productsData.length / productCategoryRequestDto.getTake(),
-        ),
+        total_items: itemCount,
+        total_pages: Math.ceil(itemCount / productCategoryRequestDto.getTake()),
         current_page: productCategoryRequestDto.getPage(),
         per_page: productCategoryRequestDto.getTake(),
       },

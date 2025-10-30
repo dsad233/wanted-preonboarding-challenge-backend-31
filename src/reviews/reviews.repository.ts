@@ -21,6 +21,11 @@ export class ReviewsRepository extends BaseRepository {
     super(defaultDataSource, request);
   }
 
+  // 상품 리뷰 ID 조회
+  async findByReviewId(id: string) {
+    return await this.getRepository(Review).findOneBy({ id: id });
+  }
+
   // 상품 리뷰 수정
   async updateProductReview(
     id: string,

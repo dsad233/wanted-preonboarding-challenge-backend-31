@@ -92,6 +92,8 @@ export class ProductsService {
       `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
     );
 
+    const count = await this.productsRepository.countProduct();
+
     if (!cached) {
       const products = await this.productsRepository.find(productRequestDto);
       await this.redisRepository.setex(
@@ -105,10 +107,8 @@ export class ProductsService {
         data: {
           items: products,
           pagination: {
-            total_items: products.length,
-            total_pages: Math.ceil(
-              products.length / productRequestDto.getTake(),
-            ),
+            total_items: count,
+            total_pages: Math.ceil(count / productRequestDto.getTake()),
             current_page: productRequestDto.getPage(),
             per_page: productRequestDto.getTake(),
           },
@@ -121,10 +121,8 @@ export class ProductsService {
         data: {
           items: JSON.parse(cached),
           pagination: {
-            total_items: JSON.parse(cached).length,
-            total_pages: Math.ceil(
-              JSON.parse(cached).length / productRequestDto.getTake(),
-            ),
+            total_items: count,
+            total_pages: Math.ceil(count / productRequestDto.getTake()),
             current_page: productRequestDto.getPage(),
             per_page: productRequestDto.getTake(),
           },
@@ -276,10 +274,21 @@ export class ProductsService {
     id: string,
     createProductImageDto: CreateProductImageDto[],
   ): Promise<object> {
-    await this.productsRepository.createProductImage(id, createProductImageDto);
+    const newImage = await this.productsRepository.createProductImage(
+      id,
+      createProductImageDto,
+    );
 
     return {
       success: true,
+      data: {
+        id: newImage.id,
+        url: newImage.url,
+        alt_text: newImage.altText,
+        is_primary: newImage.isPrimary,
+        display_order: newImage.displayOrder,
+        option_id: newImage.optionId,
+      },
       message: '상품 이미지가 성공적으로 추가되었습니다.',
     };
   }

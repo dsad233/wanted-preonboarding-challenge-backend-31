@@ -34,17 +34,15 @@ describe('ProductCategoriesService', () => {
           slug: 'test-slug',
           description: 'test',
           level: 1,
-          parentId: null,
-          imageUrl: 'http://test.com',
+          image_url: 'http://test.com',
           children: [
             {
               id: '7688aff6-e1e9-4ac4-aaff-cb400e1d077d',
               name: 'test-11',
               slug: 'test-slug-1',
               description: 'test11',
-              parentId: '99101754-77ba-470c-b2ca-c79408008143',
               level: 2,
-              imageUrl: 'http://test11.com',
+              image_url: 'http://test11.com',
             },
           ],
         },
@@ -53,9 +51,9 @@ describe('ProductCategoriesService', () => {
           name: 'test2',
           slug: 'test-slug2',
           description: 'test2',
-          parentId: null,
           level: 1,
-          imageUrl: 'http://test2.com',
+          image_url: 'http://test2.com',
+          children: [],
         },
       ];
 
@@ -86,17 +84,15 @@ describe('ProductCategoriesService', () => {
           slug: 'test-slug',
           description: 'test',
           level: 1,
-          parentId: null,
-          imageUrl: 'http://test.com',
+          image_url: 'http://test.com',
           children: [
             {
               id: '7688aff6-e1e9-4ac4-aaff-cb400e1d077d',
               name: 'test-11',
               slug: 'test-slug-1',
               description: 'test11',
-              parentId: '99101754-77ba-470c-b2ca-c79408008143',
               level: 2,
-              imageUrl: 'http://test11.com',
+              image_url: 'http://test11.com',
             },
           ],
         },
@@ -105,9 +101,9 @@ describe('ProductCategoriesService', () => {
           name: 'test2',
           slug: 'test-slug2',
           description: 'test2',
-          parentId: null,
           level: 1,
-          imageUrl: 'http://test2.com',
+          image_url: 'http://test2.com',
+          children: [],
         },
       ];
 
