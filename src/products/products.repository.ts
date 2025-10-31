@@ -377,14 +377,14 @@ export class ProductsRepository extends BaseRepository {
     if (result.productCategories?.length) {
       for (const category of result.productCategories) {
         categoryArray.push({
-          id: category?.category.id,
-          name: category?.category.name,
-          slug: category?.category.slug,
-          is_primary: category?.isPrimary,
+          id: category.category?.id,
+          name: category.category?.name,
+          slug: category.category?.slug,
+          is_primary: category.isPrimary,
           parent: {
-            id: category.category.parentCategory?.id,
-            name: category.category.parentCategory?.name,
-            slug: category.category.parentCategory?.slug,
+            id: category.category?.parentCategory?.id,
+            name: category.category?.parentCategory?.name,
+            slug: category.category?.parentCategory?.slug,
           },
         });
       }
