@@ -21,4 +21,6 @@ export enum PrefixType {
   CATEGORIES = 'CATEGORIES',
   // product_category_findOne Method
   CATEGORY = 'CATEGORY',
+  // product_review_findReviews Method
+  REVIEWS = 'REVIEWS',
 }
