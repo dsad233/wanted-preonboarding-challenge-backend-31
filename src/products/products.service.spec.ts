@@ -406,14 +406,26 @@ describe('ProductsService', () => {
           created_at: new Date(),
         },
       ];
-      const productCount = products.length * 2;
+
+      const response = {
+        success: true,
+        data: {
+          items: products,
+          pagination: {
+            total_items: products.length,
+            total_pages: Math.ceil(
+              products.length / productRequestDto.getTake(),
+            ),
+            current_page: productRequestDto.getPage(),
+            per_page: productRequestDto.getTake(),
+          },
+        },
+        message: '상품 목록을 성공적으로 조회했습니다.',
+      };
 
       jest
         .spyOn(redisRepository, 'get')
-        .mockResolvedValue(JSON.stringify(products));
-      jest
-        .spyOn(productsRepository, 'countProduct')
-        .mockResolvedValue(productCount);
+        .mockResolvedValue(JSON.stringify(response));
 
       const find = await productsService.find(productRequestDto);
 
@@ -422,22 +434,7 @@ describe('ProductsService', () => {
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-      expect(productsRepository.countProduct).toHaveBeenCalledWith();
-      expect(productsRepository.countProduct).toHaveBeenCalledTimes(1);
-
-      expect(find).toEqual({
-        success: true,
-        data: {
-          items: JSON.parse(JSON.stringify(products)),
-          pagination: {
-            total_items: productCount,
-            total_pages: Math.ceil(productCount / productRequestDto.getTake()),
-            current_page: productRequestDto.getPage(),
-            per_page: productRequestDto.getTake(),
-          },
-        },
-        message: '상품 목록을 성공적으로 조회했습니다.',
-      });
+      expect(find).toEqual(JSON.parse(JSON.stringify(response)));
     });
 
     it('[상품 전체 목록 조회] Default find Success', async () => {
@@ -524,13 +521,26 @@ describe('ProductsService', () => {
         },
       ];
 
-      const productCount = products.length * 2;
+      const response = {
+        success: true,
+        data: {
+          items: products,
+          pagination: {
+            total_items: products.length,
+            total_pages: Math.ceil(
+              products.length / productRequestDto.getTake(),
+            ),
+            current_page: productRequestDto.getPage(),
+            per_page: productRequestDto.getTake(),
+          },
+        },
+        message: '상품 목록을 성공적으로 조회했습니다.',
+      };
 
       jest.spyOn(redisRepository, 'get').mockResolvedValue(undefined);
       jest
-        .spyOn(productsRepository, 'countProduct')
-        .mockResolvedValue(productCount);
-      jest.spyOn(productsRepository, 'find').mockResolvedValue(products);
+        .spyOn(productsRepository, 'find')
+        .mockResolvedValue([products, products.length]);
       jest.spyOn(redisRepository, 'setex').mockResolvedValue();
 
       const find = await productsService.find(productRequestDto);
@@ -540,32 +550,17 @@ describe('ProductsService', () => {
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-      expect(productsRepository.countProduct).toHaveBeenCalledWith();
-      expect(productsRepository.countProduct).toHaveBeenCalledTimes(1);
-
       expect(productsRepository.find).toHaveBeenCalledWith(productRequestDto);
       expect(productsRepository.find).toHaveBeenCalledTimes(1);
 
       expect(redisRepository.setex).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
         120000,
-        JSON.stringify(products),
+        JSON.stringify(response),
       );
       expect(redisRepository.setex).toHaveBeenCalledTimes(1);
 
-      expect(find).toEqual({
-        success: true,
-        data: {
-          items: products,
-          pagination: {
-            total_items: productCount,
-            total_pages: Math.ceil(productCount / productRequestDto.getTake()),
-            current_page: productRequestDto.getPage(),
-            per_page: productRequestDto.getTake(),
-          },
-        },
-        message: '상품 목록을 성공적으로 조회했습니다.',
-      });
+      expect(find).toEqual(response);
     });
   });
 
@@ -775,22 +770,21 @@ describe('ProductsService', () => {
         ],
       };
 
+      const response = {
+        success: true,
+        data: product,
+        message: '상품 상세 정보를 성공적으로 조회했습니다.',
+      };
+
       jest
         .spyOn(redisRepository, 'get')
-        .mockResolvedValue(JSON.stringify(product));
-
+        .mockResolvedValue(JSON.stringify(response));
       const findOne = await productsService.findOne(productId);
-
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
-
-      expect(findOne).toEqual({
-        success: true,
-        data: JSON.parse(JSON.stringify(product)),
-        message: '상품 상세 정보를 성공적으로 조회했습니다.',
-      });
+      expect(findOne).toEqual(JSON.parse(JSON.stringify(response)));
     });
 
     it('[상품 목록 상세 조회] Default findOne Success', async () => {
@@ -998,32 +992,29 @@ describe('ProductsService', () => {
         ],
       };
 
+      const response = {
+        success: true,
+        data: product,
+        message: '상품 상세 정보를 성공적으로 조회했습니다.',
+      };
+
       jest.spyOn(redisRepository, 'get').mockResolvedValue(undefined);
       jest.spyOn(productsRepository, 'findOne').mockResolvedValue(product);
       jest.spyOn(redisRepository, 'setex').mockResolvedValue();
-
       const findOne = await productsService.findOne(productId);
-
       expect(redisRepository.get).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
-
       expect(productsRepository.findOne).toHaveBeenCalledWith(productId);
       expect(productsRepository.findOne).toHaveBeenCalledTimes(1);
-
       expect(redisRepository.setex).toHaveBeenCalledWith(
         `${TYPE.PrefixType.PRODUCT}:productId=${productId}`,
         300000,
-        JSON.stringify(product),
+        JSON.stringify(response),
       );
       expect(redisRepository.setex).toHaveBeenCalledTimes(1);
-
-      expect(findOne).toEqual({
-        success: true,
-        data: product,
-        message: '상품 상세 정보를 성공적으로 조회했습니다.',
-      });
+      expect(findOne).toEqual(response);
     });
   });
 
@@ -1501,7 +1492,7 @@ describe('ProductsService', () => {
   });
 
   describe('[상품 리뷰 조회] findReviews Method', () => {
-    it('[상품 리뷰 조회] findReviews Success', async () => {
+    it('[상품 리뷰 조회] Cache findReviews Success', async () => {
       const productId = '5affd8e7-4490-4562-b549-cc5cbfe0c4ca';
       const productReviewRequestDto = new ProductReviewRequestDto();
       Object.assign(productReviewRequestDto, {
@@ -1565,6 +1556,15 @@ describe('ProductsService', () => {
         },
       };
 
+      const response = {
+        success: true,
+        data: result,
+        message: '상품 리뷰를 성공적으로 조회했습니다.',
+      };
+
+      jest
+        .spyOn(redisRepository, 'get')
+        .mockResolvedValue(JSON.stringify(response));
       jest.spyOn(productsRepository, 'findReviews').mockResolvedValue(result);
 
       const find = await productsService.findReviews(
@@ -1572,17 +1572,112 @@ describe('ProductsService', () => {
         productReviewRequestDto,
       );
 
+      expect(redisRepository.get).toHaveBeenCalledWith(
+        `${TYPE.PrefixType.REVIEWS}:productId=${productId}:page=${productReviewRequestDto.getPage()}:pages=${productReviewRequestDto.getTake()}:sort=${productReviewRequestDto.sort}:rating=${productReviewRequestDto.rating}`,
+      );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
+
+      expect(find).toEqual(JSON.parse(JSON.stringify(response)));
+    });
+
+    it('[상품 리뷰 조회] Default findReviews Success', async () => {
+      const productId = '5affd8e7-4490-4562-b549-cc5cbfe0c4ca';
+      const productReviewRequestDto = new ProductReviewRequestDto();
+      Object.assign(productReviewRequestDto, {
+        sort: 'ASC',
+        rating: 1,
+      });
+
+      const reviews = [
+        {
+          id: '612970ba-1a93-4c6b-81c4-98bdf49ac53b',
+          user: {
+            id: '21936e74-864b-4cda-89cb-a01aa4b972b9',
+            name: 'test-user',
+            avatar_url: 'http://test.com',
+          },
+          rating: 1,
+          title: 'test-title-1',
+          content: 'test-content-1',
+          created_at: new Date(),
+          updated_at: new Date(),
+          verified_purchase: true,
+          helpful_votes: 0,
+        },
+        {
+          id: '5f81ad0d-994e-4201-8162-93b5ed8a653a',
+          user: {
+            id: '21936e74-864b-4cda-89cb-a01aa4b972b9',
+            name: 'test-user',
+            avatar_url: 'http://test.com',
+          },
+          rating: 1,
+          title: 'test-title-2',
+          content: 'test-content-2',
+          created_at: new Date(),
+          updated_at: new Date(),
+          verified_purchase: true,
+          helpful_votes: 0,
+        },
+      ];
+
+      const result = {
+        items: reviews,
+        summary: {
+          average_rating: 1,
+          total_count: 2,
+          distribution: {
+            5: 0,
+            4: 0,
+            3: 0,
+            2: 0,
+            1: 2,
+          },
+        },
+        pagination: {
+          total_items: reviews.length,
+          total_pages: Math.ceil(
+            reviews.length / productReviewRequestDto.getTake(),
+          ),
+          current_page: productReviewRequestDto.getPage(),
+          per_page: productReviewRequestDto.getTake(),
+        },
+      };
+
+      const response = {
+        success: true,
+        data: result,
+        message: '상품 리뷰를 성공적으로 조회했습니다.',
+      };
+
+      jest.spyOn(redisRepository, 'get').mockResolvedValue(undefined);
+      jest.spyOn(productsRepository, 'findReviews').mockResolvedValue(result);
+      jest.spyOn(redisRepository, 'setex').mockResolvedValue();
+
+      const find = await productsService.findReviews(
+        productId,
+        productReviewRequestDto,
+      );
+
+      expect(redisRepository.get).toHaveBeenCalledWith(
+        `${TYPE.PrefixType.REVIEWS}:productId=${productId}:page=${productReviewRequestDto.getPage()}:pages=${productReviewRequestDto.getTake()}:sort=${productReviewRequestDto.sort}:rating=${productReviewRequestDto.rating}`,
+      );
+      expect(redisRepository.get).toHaveBeenCalledTimes(1);
+
       expect(productsRepository.findReviews).toHaveBeenCalledWith(
         productId,
         productReviewRequestDto,
       );
       expect(productsRepository.findReviews).toHaveBeenCalledTimes(1);
 
-      expect(find).toEqual({
-        success: true,
-        data: result,
-        message: '상품 리뷰를 성공적으로 조회했습니다.',
-      });
+      expect(redisRepository.setex).toHaveBeenCalledWith(
+        `${TYPE.PrefixType.REVIEWS}:productId=${productId}:page=${productReviewRequestDto.getPage()}:pages=${productReviewRequestDto.getTake()}:sort=${productReviewRequestDto.sort}:rating=${productReviewRequestDto.rating}`,
+        120000,
+        JSON.stringify(response),
+      );
+      expect(redisRepository.setex).toHaveBeenCalledTimes(1);
+
+      expect(find).toEqual(response);
     });
   });
 

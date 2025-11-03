@@ -17,27 +17,25 @@ export class ProductCategoriesService {
       `${TYPE.PrefixType.CATEGORIES}:level=${level}`,
     );
 
-    if (!cached) {
-      const categories = await this.productCategoriesRepository.find(level);
-
-      await this.redisRepository.setex(
-        `${TYPE.PrefixType.CATEGORIES}:level=${level}`,
-        120000,
-        JSON.stringify(categories),
-      );
-
-      return {
-        success: true,
-        data: categories,
-        message: '카테고리 목록을 성공적으로 조회했습니다.',
-      };
-    } else {
-      return {
-        success: true,
-        data: JSON.parse(cached),
-        message: '카테고리 목록을 성공적으로 조회했습니다.',
-      };
+    if (cached) {
+      return JSON.parse(cached);
     }
+
+    const categories = await this.productCategoriesRepository.find(level);
+
+    const response = {
+      success: true,
+      data: categories,
+      message: '카테고리 목록을 성공적으로 조회했습니다.',
+    };
+
+    await this.redisRepository.setex(
+      `${TYPE.PrefixType.CATEGORIES}:level=${level}`,
+      120000,
+      JSON.stringify(categories),
+    );
+
+    return response;
   }
 
   // 특정 카테고리의 상품 목록 조회
@@ -49,30 +47,28 @@ export class ProductCategoriesService {
       `${TYPE.PrefixType.CATEGORY}:page=${productCategoryRequestDto.getPage()}:pages=${productCategoryRequestDto.getTake()}:includeSubcategories=${productCategoryRequestDto.includeSubcategories}`,
     );
 
-    if (!cached) {
-      const category =
-        await this.productCategoriesRepository.findOneCategoryAndProduct(
-          id,
-          productCategoryRequestDto,
-        );
+    if (cached) {
+      return JSON.parse(cached);
+    }
 
-      await this.redisRepository.setex(
-        `${TYPE.PrefixType.CATEGORY}:page=${productCategoryRequestDto.getPage()}:pages=${productCategoryRequestDto.getTake()}:includeSubcategories=${productCategoryRequestDto.includeSubcategories}`,
-        300000,
-        JSON.stringify(category),
+    const category =
+      await this.productCategoriesRepository.findOneCategoryAndProduct(
+        id,
+        productCategoryRequestDto,
       );
 
-      return {
-        success: true,
-        data: category,
-        message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
-      };
-    } else {
-      return {
-        success: true,
-        data: JSON.parse(cached),
-        message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
-      };
-    }
+    const response = {
+      success: true,
+      data: category,
+      message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
+    };
+
+    await this.redisRepository.setex(
+      `${TYPE.PrefixType.CATEGORY}:page=${productCategoryRequestDto.getPage()}:pages=${productCategoryRequestDto.getTake()}:includeSubcategories=${productCategoryRequestDto.includeSubcategories}`,
+      300000,
+      JSON.stringify(response),
+    );
+
+    return response;
   }
 }

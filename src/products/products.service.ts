@@ -92,44 +92,34 @@ export class ProductsService {
       `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
     );
 
-    const count = await this.productsRepository.countProduct();
-
-    if (!cached) {
-      const products = await this.productsRepository.find(productRequestDto);
-      await this.redisRepository.setex(
-        `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
-        120000,
-        JSON.stringify(products),
-      );
-
-      return {
-        success: true,
-        data: {
-          items: products,
-          pagination: {
-            total_items: count,
-            total_pages: Math.ceil(count / productRequestDto.getTake()),
-            current_page: productRequestDto.getPage(),
-            per_page: productRequestDto.getTake(),
-          },
-        },
-        message: '상품 목록을 성공적으로 조회했습니다.',
-      };
-    } else {
-      return {
-        success: true,
-        data: {
-          items: JSON.parse(cached),
-          pagination: {
-            total_items: count,
-            total_pages: Math.ceil(count / productRequestDto.getTake()),
-            current_page: productRequestDto.getPage(),
-            per_page: productRequestDto.getTake(),
-          },
-        },
-        message: '상품 목록을 성공적으로 조회했습니다.',
-      };
+    if (cached) {
+      return JSON.parse(cached);
     }
+
+    const [products, count] =
+      await this.productsRepository.find(productRequestDto);
+
+    const response = {
+      success: true,
+      data: {
+        items: products,
+        pagination: {
+          total_items: Number(count),
+          total_pages: Math.ceil(Number(count) / productRequestDto.getTake()),
+          current_page: productRequestDto.getPage(),
+          per_page: productRequestDto.getTake(),
+        },
+      },
+      message: '상품 목록을 성공적으로 조회했습니다.',
+    };
+
+    await this.redisRepository.setex(
+      `${TYPE.PrefixType.PRODUCTS}:page=${productRequestDto.getPage()}:pages=${productRequestDto.getTake()}:sort=${productRequestDto.sort}:status=${productRequestDto.status}:seller=${productRequestDto.seller}:brand=${productRequestDto.brand}:minPrice=${productRequestDto.minPrice}:maxPrice=${productRequestDto.maxPrice}:inStock=${productRequestDto.inStock}:category=${productRequestDto.category}:search=${productRequestDto.search}`,
+      120000,
+      JSON.stringify(response),
+    );
+
+    return response;
   }
 
   // 상품 목록 상세 조회
@@ -138,27 +128,25 @@ export class ProductsService {
       `${TYPE.PrefixType.PRODUCT}:productId=${id}`,
     );
 
-    if (!cached) {
-      const product = await this.productsRepository.findOne(id);
-
-      await this.redisRepository.setex(
-        `${TYPE.PrefixType.PRODUCT}:productId=${id}`,
-        300000,
-        JSON.stringify(product),
-      );
-
-      return {
-        success: true,
-        data: product,
-        message: '상품 상세 정보를 성공적으로 조회했습니다.',
-      };
-    } else {
-      return {
-        success: true,
-        data: JSON.parse(cached),
-        message: '상품 상세 정보를 성공적으로 조회했습니다.',
-      };
+    if (cached) {
+      return JSON.parse(cached);
     }
+
+    const product = await this.productsRepository.findOne(id);
+
+    const response = {
+      success: true,
+      data: product,
+      message: '상품 상세 정보를 성공적으로 조회했습니다.',
+    };
+
+    await this.redisRepository.setex(
+      `${TYPE.PrefixType.PRODUCT}:productId=${id}`,
+      300000,
+      JSON.stringify(response),
+    );
+
+    return response;
   }
 
   // 상품 목록 수정
@@ -302,16 +290,32 @@ export class ProductsService {
     id: string,
     productReviewRequestDto: ProductReviewRequestDto,
   ): Promise<object> {
+    const cached = await this.redisRepository.get(
+      `${TYPE.PrefixType.REVIEWS}:productId=${id}:page=${productReviewRequestDto.getPage()}:pages=${productReviewRequestDto.getTake()}:sort=${productReviewRequestDto.sort}:rating=${productReviewRequestDto.rating}`,
+    );
+
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const reviews = await this.productsRepository.findReviews(
       id,
       productReviewRequestDto,
     );
 
-    return {
+    const response = {
       success: true,
       data: reviews,
       message: '상품 리뷰를 성공적으로 조회했습니다.',
     };
+
+    await this.redisRepository.setex(
+      `${TYPE.PrefixType.REVIEWS}:productId=${id}:page=${productReviewRequestDto.getPage()}:pages=${productReviewRequestDto.getTake()}:sort=${productReviewRequestDto.sort}:rating=${productReviewRequestDto.rating}`,
+      120000,
+      JSON.stringify(response),
+    );
+
+    return response;
   }
 
   // 상품 리뷰 등록

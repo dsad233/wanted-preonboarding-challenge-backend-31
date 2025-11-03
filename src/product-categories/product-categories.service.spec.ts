@@ -57,9 +57,15 @@ describe('ProductCategoriesService', () => {
         },
       ];
 
+      const response = {
+        success: true,
+        data: categories,
+        message: '카테고리 목록을 성공적으로 조회했습니다.',
+      };
+
       jest
         .spyOn(redisRepository, 'get')
-        .mockResolvedValue(JSON.stringify(categories));
+        .mockResolvedValue(JSON.stringify(response));
 
       const find = await productCategoriesService.find(level);
 
@@ -68,11 +74,7 @@ describe('ProductCategoriesService', () => {
       );
       expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-      expect(find).toEqual({
-        success: true,
-        data: JSON.parse(JSON.stringify(categories)),
-        message: '카테고리 목록을 성공적으로 조회했습니다.',
-      });
+      expect(find).toEqual(JSON.parse(JSON.stringify(response)));
     });
 
     it('[카테고리 목록 조회] Default find Success', async () => {
@@ -191,9 +193,15 @@ describe('ProductCategoriesService', () => {
           },
         };
 
+        const response = {
+          success: true,
+          data: category,
+          message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
+        };
+
         jest
           .spyOn(redisRepository, 'get')
-          .mockResolvedValue(JSON.stringify(category));
+          .mockResolvedValue(JSON.stringify(response));
 
         const findOne = await productCategoriesService.findOne(
           categoryId,
@@ -205,11 +213,7 @@ describe('ProductCategoriesService', () => {
         );
         expect(redisRepository.get).toHaveBeenCalledTimes(1);
 
-        expect(findOne).toEqual({
-          success: true,
-          data: JSON.parse(JSON.stringify(category)),
-          message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
-        });
+        expect(findOne).toEqual(JSON.parse(JSON.stringify(response)));
       });
 
       it('[특정 카테고리의 상품 목록 조회] Default findOne Success', async () => {
@@ -265,6 +269,12 @@ describe('ProductCategoriesService', () => {
           },
         };
 
+        const response = {
+          success: true,
+          data: category,
+          message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
+        };
+
         jest.spyOn(redisRepository, 'get').mockResolvedValue(undefined);
         jest
           .spyOn(productCategoriesRepository, 'findOneCategoryAndProduct')
@@ -291,15 +301,11 @@ describe('ProductCategoriesService', () => {
         expect(redisRepository.setex).toHaveBeenCalledWith(
           `${TYPE.PrefixType.CATEGORY}:page=${productCategoryRequestDto.getPage()}:pages=${productCategoryRequestDto.getTake()}:includeSubcategories=${productCategoryRequestDto.includeSubcategories}`,
           300000,
-          JSON.stringify(category),
+          JSON.stringify(response),
         );
         expect(redisRepository.setex).toHaveBeenCalledTimes(1);
 
-        expect(findOne).toEqual({
-          success: true,
-          data: category,
-          message: '카테고리 상품 목록을 성공적으로 조회했습니다.',
-        });
+        expect(findOne).toEqual(response);
       });
     });
   });

@@ -82,24 +82,6 @@ export class ProductsRepository extends BaseRepository {
     });
   }
 
-  // 상품 총 갯수 조회
-  async countProduct() {
-    return await this.getRepository(Product).count({
-      where: {
-        status: Not(STATUS.ProductStatus.DELETED),
-      },
-    });
-  }
-
-  // 상품 리뷰 총 갯수 조회
-  async countProductReview(productId: string) {
-    return await this.getRepository(Review).count({
-      where: {
-        productId: productId,
-      },
-    });
-  }
-
   // 상품 생성
   async createProduct(createProductDto: CreateProductDto) {
     const product = this.getRepository(Product).create({
@@ -295,7 +277,9 @@ export class ProductsRepository extends BaseRepository {
       });
     }
 
-    const result = (await products.getMany()).map((data) => {
+    const [rows, count] = await products.getManyAndCount();
+
+    const result = rows.map((data) => {
       const productImageArray = [];
       for (const image of data.productImages) {
         if (image.isPrimary) {
@@ -342,7 +326,7 @@ export class ProductsRepository extends BaseRepository {
       };
     });
 
-    return result;
+    return [result, count];
   }
 
   // 상품 목록 상세 조회
@@ -832,7 +816,7 @@ export class ProductsRepository extends BaseRepository {
       request.rating = productReviewRequestDto.rating;
     }
 
-    const reviews = await this.getRepository(Review).find({
+    const [reviews, count] = await this.getRepository(Review).findAndCount({
       relations: { user: true },
       where: { productId: id, rating: request.rating },
       order: {
@@ -903,8 +887,6 @@ export class ProductsRepository extends BaseRepository {
       };
     });
 
-    const itemCount = await this.countProductReview(id);
-
     return {
       items: result,
       summary: {
@@ -919,8 +901,8 @@ export class ProductsRepository extends BaseRepository {
         },
       },
       pagination: {
-        total_items: itemCount,
-        total_pages: Math.ceil(itemCount / productReviewRequestDto.getTake()),
+        total_items: count,
+        total_pages: Math.ceil(count / productReviewRequestDto.getTake()),
         current_page: productReviewRequestDto.getPage(),
         per_page: productReviewRequestDto.getTake(),
       },

@@ -3,7 +3,7 @@ import { Category, Product } from '@libs/database/entities';
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Not } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { ProductCategoryRequestDto } from './dto/productCategoryRequestDto';
 import { STATUS } from '@libs/enums';
 
@@ -14,15 +14,6 @@ export class ProductCategoriesRepository extends BaseRepository {
     @Inject(REQUEST) request: Request,
   ) {
     super(defaultDataSource, request);
-  }
-
-  // 상품 총 갯수 조회
-  async countProduct() {
-    return await this.getRepository(Product).count({
-      where: {
-        status: Not(STATUS.ProductStatus.DELETED),
-      },
-    });
   }
 
   // 카테고리 목록 조회
@@ -140,7 +131,7 @@ export class ProductCategoriesRepository extends BaseRepository {
       products.orderBy('product.createdAt', 'DESC');
     }
 
-    const productsData = await products.getMany();
+    const [productsData, count] = await products.getManyAndCount();
 
     const productArray = [];
     for (const product of productsData ?? []) {
@@ -178,8 +169,6 @@ export class ProductCategoriesRepository extends BaseRepository {
       });
     }
 
-    const itemCount = await this.countProduct();
-
     return {
       category: {
         id: categoryData?.id,
@@ -199,8 +188,8 @@ export class ProductCategoriesRepository extends BaseRepository {
       },
       item: productArray,
       pagination: {
-        total_items: itemCount,
-        total_pages: Math.ceil(itemCount / productCategoryRequestDto.getTake()),
+        total_items: count,
+        total_pages: Math.ceil(count / productCategoryRequestDto.getTake()),
         current_page: productCategoryRequestDto.getPage(),
         per_page: productCategoryRequestDto.getTake(),
       },
