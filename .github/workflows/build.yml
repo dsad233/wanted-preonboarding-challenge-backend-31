@@ -1,25 +1,22 @@
 name: build
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  # pull_request:
-  #   branches:
-  #       - main
-  #   types:
-  #     - closed
+    types:
+      - closed
 
-# concurrency:
-#   group: ${{ github.head_ref || github.run_id }}
-#   cancel-in-progress: true
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   lint:
-    # if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
     name: lint
     runs-on: ${{ matrix.os }}
     strategy:
